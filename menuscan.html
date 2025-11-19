@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AR Menu</title>
+<script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+<style>
+html, body { margin:0; padding:0; width:100%;    min-height: 100vh; overflow:hidden; }
+
+
+#content {
+  position:absolute;
+  bottom:10px; left:50%;
+  transform:translateX(-50%);
+  background:rgba(0,0,0,0.7);
+  color:#fff;
+  padding:5px;
+  border-radius:8px;
+  z-index:999;
+  width: 150px;    
+  max-width: 95%;  
+  text-align:center;
+  display: flex;
+  flex-direction: column; 
+  align-items: center;
+}
+
+ #content span {
+    font-size: 14px;
+  }
+
+
+button {
+  margin:6px;
+  padding:12px 18px;
+  cursor:pointer;
+  border:none;
+  border-radius:6px;
+  background:#5a4d35; 
+  color:#fff;
+  font-size:16px;
+  transition: background 0.3s;
+}
+button.active {
+  background: yellow;   
+  color: black;        
+}
+#size-buttons {
+  display: flex;    
+  justify-content: center;
+  margin-top:6px;
+  gap: 8px;           
+}
+#description {
+  margin-top:10px;
+  font-size:15px;
+  color:#ffd;
+  text-align:center;
+  max-width:400px;
+}
+/* Back button */
+#back-btn {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 10px 16px;
+  font-size: 15px;
+  font-weight: bold;
+  background: black;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 1000;
+  transition: background 0.3s, transform 0.2s;
+}
+#back-btn:hover {
+  background: #e9e51f;
+  color: black;
+  transform: scale(1.05);
+}
+
+/* Help Button */
+#helpBtn {
+  background: #e9e51f;
+  border: none;
+  border-radius: 6px;
+  color: black;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+#helpBtn:hover {
+  background: #333;
+  color: rgb(255, 255, 255);
+}
+
+/* Modal Background (Overlay) */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 999999;
+  top: 0;
+  left: 0;
+  width: 100vw; 
+  height: 100vh;            
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;  
+  align-items: center;      
+  padding: 16px;             
+  box-sizing: border-box;
+  pointer-events: all;
+}
+
+/* Modal Container */
+.modal-content {
+  background-color: #fff;
+  border-radius: 14px;
+  width: 90%;               
+  max-width: 380px;         
+  padding: 20px;
+  text-align: center;
+  color: #333;
+  position: relative;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+
+  transform: translateY(1px);
+}
+
+/* Close Button */
+.close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  font-size: 26px;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+}
+
+/* Slides */
+.slide {
+  display: none;
+}
+
+.slide.active {
+  display: block;
+}
+
+.slide img {
+  width: 100%;
+  max-height: 230px;
+  object-fit: contain;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  background: #f5f5f5;
+}
+
+/* Buttons */
+.nav-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.nav-buttons button {
+  background-color: #3a3a3a;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.nav-buttons button:hover {
+  background-color: #e9e51f;
+  color: black;
+}
+
+/* Extra safety for very small screens */
+@media (max-width: 400px) {
+  .modal-content {
+    width: 95%;
+    padding: 16px;
+  }
+  .slide img {
+    max-height: 180px;
+  }
+}
+
+
+#refreshBtn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 10px 16px;
+  font-size: 15px;
+  font-weight: bold;
+  background: #070707;
+  color: rgb(248, 248, 248);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 1000;
+  transition: background 0.3s, transform 0.2s;
+}
+#refreshBtn:hover {
+  background: #333;
+  color: white;
+  transform: scale(1.05);
+}
+
+</style>
+</head>
+<body>
+
+<button id="back-btn" onclick="window.location.href='../index.html'">← Back to Main</button>
+<button id="refreshBtn" onclick="refreshScene()">🔄 Refresh Scene</button>
+
+<!-- Add this in your HTML somewhere -->
+<div id="change-view-container" style="position: absolute; top: 55px; right: 10px; z-index: 1000;"></div>
+
+<div id="content">
+  <div style="display:flex; align-items:center; gap:10px;">
+    <span>Please wait..</span>
+    <button id="helpBtn">Help</button>
+  </div>
+</div>
+
+
+<!-- Help Modal -->
+<div id="helpModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>How to Use the Scanner</h2>
+
+    <!-- Slides -->
+    <div class="slide active">
+      <img src="../images/scanfirst.png" alt="Step 1">
+      <p>Step 1: Wait for the loading circle to change into a scanner before you start scanning.</p>
+    </div>
+
+    <div class="slide">
+      <img src="../images/scan1.jpg" alt="Step 2">
+      <p>Step 2: Each food category is a marker. Scan a category name and keep your phone steady after scanning.</p>
+    </div>
+
+    <div class="slide">
+      <img src="./images/menusize.jpg" alt="Step 3">
+      <p>Step 2: Scan this whole page to see different sizes options.</p>
+    </div>
+
+    <div class="slide">
+      <img src="./images/scan3.jpg" alt="Step 4">
+      <p>Step 3: Click your preferred option. Keep your phone steady.</p>
+    </div>
+
+    <div class="slide">
+      <img src="./images/scan4.jpg" alt="Step 5">
+      <p>Step 4: The 3D model and its description will appear shortly. If it takes too long to load, move your phone away and scan again.</p>
+    </div>
+
+    <div class="slide">
+      <img src="./images/scanbm.png" alt="Step 6">
+      <p>To scan another menu, simply move your phone to a different food category name.</p>
+    </div>
+
+    <div class="slide">
+      <img src="./images/scankm.jpg" alt="Step 7">
+      <p>To scan another menu, simply move your phone to a different food category name.</p>
+    </div>
+
+    <div class="slide">
+      <img src="./images/scankt.jpg" alt="Step 8">
+      <p>To scan another menu, simply move your phone to a different food category name.</p>
+    </div>
+
+    <div class="slide">
+      <img src="./images/scanmasala.jpg" alt="Step 9">
+      <p>To scan another menu, simply move your phone to a different food category name.</p>
+    </div>
+
+    <div class="slide">
+      <img src="./images/scanmbp.jpg" alt="Step 10">
+      <p>To scan another menu, simply move your phone to a different food category name.</p>
+    </div>
+
+    <div class="slide">
+      <img src="./images/scanvegshaw.jpg" alt="Step 11">
+      <p>To scan another menu, simply move your phone to a different food category name.</p>
+    </div>
+
+    <div class="slide">
+      <img src="./images/scanlast.jpg" alt="Step 12">
+      <p>To scan another menu, simply move your phone to a different food category name.</p>
+    </div>
+
+    <!-- Navigation buttons -->
+    <div class="nav-buttons">
+      <button id="prevBtn">Previous</button>
+      <button id="nextBtn">Next</button>
+    </div>
+  </div>
+</div>
+
+
+<a-scene mindar-image="imageTargetSrc: ./fulltarget.mind; autoStart: true; filterMinCF: 0.0001; filterBeta: 0.001;"
+         embedded
+         vr-mode-ui="enabled: false"
+         device-orientation-permission-ui="enabled: false"
+         style="width:100vw; height:100vh;">
+
+  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+
+  <!-- Marker 0: sizes -->
+<a-entity 
+  id="marker0" mindar-image-target="targetIndex: 0">
+</a-entity>
+
+  <!-- Marker 1: Biryani -->
+ <a-entity 
+  id="marker1" mindar-image-target="targetIndex: 1">
+</a-entity>
+
+   <!-- Marker 2: broasted -->
+  <a-entity 
+  id="marker2" mindar-image-target="targetIndex: 2">
+
+</a-entity>
+
+  <!-- Marker 3: combo i -->
+  <a-entity 
+  id="marker3" mindar-image-target="targetIndex: 3" >
+</a-entity>
+
+  <!-- Marker 4: Desserts -->
+ <a-entity 
+  id="marker4" mindar-image-target="targetIndex: 4" >
+</a-entity>
+
+  <!-- Marker 5: Drinks -->
+ <a-entity 
+  id="marker5" mindar-image-target="targetIndex: 5" >
+</a-entity>
+
+  <!-- Marker 6: Haleem -->
+  <a-entity 
+  id="marker6" mindar-image-target="targetIndex: 6">
+</a-entity>
+
+  <!-- Marker 7: Hummus -->
+  <a-entity 
+  id="marker7" mindar-image-target="targetIndex: 7" >
+</a-entity>
+
+  <!-- Marker 8: Mandi -->
+  <a-entity 
+  id="marker8" mindar-image-target="targetIndex: 8" >
+</a-entity>
+
+  <!-- Marker 9: Mixed -->
+  <a-entity 
+  id="marker9" mindar-image-target="targetIndex: 9">
+</a-entity>
+
+  <!-- Marker 10: Masala -->
+  <a-entity 
+  id="marker10" mindar-image-target="targetIndex: 10">
+</a-entity>
+
+ <!-- Marker 11: Maqloobah -->
+ <a-entity 
+  id="marker11" mindar-image-target="targetIndex: 11" >
+  
+</a-entity>
+
+  <!-- Marker 12: Pastil -->
+<a-entity 
+  id="marker12" mindar-image-target="targetIndex: 12" >
+</a-entity>
+
+  <!-- Marker 13: Pita -->
+ <a-entity 
+  id="marker13" mindar-image-target="targetIndex: 13" >
+</a-entity>
+
+  <!-- Marker 14: Shaw rice -->
+  <a-entity 
+  id="marker14" mindar-image-target="targetIndex: 14" >
+</a-entity>
+  
+  <!-- Marker 15: Shawarma -->
+<a-entity 
+  id="marker15" mindar-image-target="targetIndex: 15" >
+</a-entity>
+
+  <!-- Marker 16: samosa -->
+  <a-entity 
+  id="marker16" mindar-image-target="targetIndex: 16">
+</a-entity>
+
+  <!-- Marker 17: Tikka -->
+  <a-entity 
+  id="marker17" mindar-image-target="targetIndex: 17" >
+</a-entity>
+
+  <!-- Marker 18: Veggies -->
+  <a-entity 
+  id="marker18" mindar-image-target="targetIndex: 18" >
+</a-entity>
+
+  <!-- Marker 19: Kabab-->
+  <a-entity 
+  id="marker19" mindar-image-target="targetIndex: 19">
+</a-entity>
+
+<!-- Marker20: Kabsah -->
+  <a-entity 
+  id="marker20" mindar-image-target="targetIndex: 20">
+</a-entity>
+
+<!-- Marker21: ADD-ONS -->
+  <a-entity 
+  id="marker21" mindar-image-target="targetIndex: 21">
+</a-entity>
+
+
+ 
+
+</a-scene>
+
+
+<script type="module">
+const contentDiv = document.getElementById('content');
+
+const markerMenu = {
+ 0: { // Sizes
+      categories: {
+        "Budget–Regular": {
+          variants: {
+            Budget: { 
+            description: "Budget size Chicken Biryani - Good for 1 ",
+              path: 'models/budget_chick_bryani.glb', 
+              scale: '0.2 0.2 0.2', 
+              position: '0 0 0' 
+            },
+            Solo: { 
+              description: "Solo size Beef Kabab w/ Rice - Good for 1-2pax",
+              path: 'models/solo_kabab.glb', 
+              scale: '0.2 0.2 0.2', 
+              position: '0 0 0' 
+            },
+            Regular: { 
+              description: "Regular size Mandi Chicken - Good for 2-3pax",
+              path: 'models/regularmandi.glb', 
+              scale: '0.2 0.2 0.2', 
+              position: '0 0 0' 
+            }, 
+          }
+        },
+        "Medium-Jumbo": {
+          variants: {
+            Medium: { 
+              description: "Medium size Mutton Biryani - good for 3-4pax",
+              path: 'models/medium_mtn_bryni.glb', 
+              scale: '0.2 0.2 0.2', 
+              position: '0 0 0' 
+            },
+            Large: { 
+              description: "Large size Kabsah Chicken - good for 4-5pax",
+              path: 'models/large_kbsah.glb', 
+                scale: '0.2 0.2 0.2', 
+                position: '0 0 0' 
+              },
+              Jumbo: { 
+                description: "Jumbo sized Mixed Biryani Shrimp&Beef - good for 5-6pax",
+                path: 'models/jumbo_mixed.glb', 
+                scale: '0.2 0.2 0.2', 
+                  position: '0 0 0' 
+              },     
+          }
+        },
+        "Bilao Sizes": {
+          variants: {
+            Bilao12: { 
+              description: "Bilao size12' Chicken & Mutton Biryani - good for 6-8pax",
+              path: 'models/bilao12_chickmtn.glb', 
+                scale: '0.2 0.2 0.2', 
+                position: '0 0 0' 
+              },
+            Bilao14: { 
+              description: "Bilao size 14inch Chicken & Beef Kabsah - good for 8-11pax",
+              path: 'models/bilao14_chickbeefkabsah.glb', 
+                scale: '0.2 0.2 0.2', 
+                position: '0 0 0' 
+              },
+          }
+        }
+      }
+    },
+
+  1: { // Biryani
+  variants: {
+    Chicken: { 
+      description: "Our Chicken Biryani is made with tender chicken pieces, basmati rice(long grains), and traditional spices.",
+      path: 'models/smallchbiryani-v1.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    Beef: { 
+      description: "Our Beef Biryani features soft beef cubes simmered with herbs and basmati rice.",
+      path: 'models/smbeefbryani-v1.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    Mutton: { 
+      description: "Our Mutton Biryani combines juicy mutton cuts and basmati rice cooked in authentic spices.",
+      path: 'models/smmtnbryani-v2.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    Shrimp: { 
+      description: "Our Shrimp Biryani is a seafood delight with basmati rice infused with mild spices and shrimp.",
+      path: 'models/smshrimpbryani-v3.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+  }
+},
+  
+  
+  2: { // Broasted
+    description: "an Arab-style method of cooking chicken usually in  deep frying and it is seasoned with Middle Eastern spices.",
+    default: { path: 'models/broasted-v1.glb', scale: '0.2 0.2 0.2', position: '0 0 0' },
+  }, 
+  3:{ // COMBO I
+    description: "Biryani Chicken with 1pc beef kabab and choose of 1 drink.",
+    default: { path: 'models/comboscan.glb', scale: '0.2 0.2 0.2', position: '0 0 0' },
+  },
+   4:{ // Desserts
+    description: "A dessert that is soft and round made from milk solids , deep-fried and then soaked in a sugar syrup. It is known for it’s texture and rich sweetness",
+    default: { path: 'models/gulab.glb', scale: '0.2 0.2 0.2', position: '0 0 0' },
+  },
+  5:{ // Drinks
+    description: "Choose a drink category.",
+    variants: {
+      "Canned Soda": { 
+      description: "provide the perfect balance to bold, spicy flavors",
+      path: 'models/sodas.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+      "Shakes": { 
+      description: "soothe the heat of spicy flavors while adding a rich, sweet finish to your meal.",
+      path: 'models/shakes.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+      "Lemonade": { 
+      description: "A refreshing beverage made from freshly squeezed lemon and cucumber.",
+      path: 'models/lemonade.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    "Lassi": { 
+      description: "A traditional yogurt-based drink from the Indian subcontinent. it is known for its  creamy texture.",
+      path: 'models/lassi.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    "Chai": { 
+      description: "It is made by brewing black tea or with milk and aromatic spices",
+      path: 'models/chai2.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+
+    }
+  },
+  6:{ // Haleem
+    description: "A stew made from lentils or daal, and can also be mixed with tender meat  simmered with aromatic spices",
+    default: { path: 'models/haleem.glb', scale: '0.2 0.2 0.2', position: '0 0 0' },
+  },
+  7: { // Hummus
+    description: " Made from blended chickpeas. Best partner for Khubz. Originated in the Middle East",
+    default: { path: 'models/hummus.glb', scale: '0.2 0.2 0.2', position: '0 0 0' },
+  },
+  8: { // Mandi
+  variants: {
+    Chicken: { 
+      description: "Chicken Mandi is oven-roasted featuring tender chicken tomato-based layered over biryani rice.",
+      path: 'models/smallchmandi-v2.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    Beef: { 
+      description: "Our Beef Mandi simmered in a rich tomato-based blend roasted in the oven, paired with biryani rice.",
+      path: 'models/smallbeefmandi-v5.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    Mutton: { 
+      description: "Our Mutton Mandi features mutton pieces baked with tomato-spiced oven-roasted with biryani rice.",
+      path: 'models/smallmtnmandi-v3.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    Shrimp: { 
+      description: "Our Shrimp Mandi is a seafood twist, combining shrimp with tomato-based blend, lightly oven-roasted with biryani rice",
+      path: 'models/smallshrimpmandi-v4.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+  }
+},
+9:  { // Mixed
+   variants: { 
+    "Mixed Biryani": {
+      description: "Mixed Chicken and Shrimp cooked together with basmati rice and spices",
+      path: 'models/mixedbiryani-v1.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    "Mixed Kabsah": {
+      description: "mixed chiken and beef topped on basmati rice , marinated with spices.",
+      path: 'models/mixedkabsah-v2.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+    "Mixed Mandi": {
+      model: { path: 'models/mixedmandi-v3.glb', scale: '0.2 0.2 0.2', position: '0 0 0' },
+      description: "mixed chicken and mutton with blend of tomato and biryani rice",
+      path: 'models/mixedmandi-v3.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+  }
+},
+10: { // Masala Menu
+   variants: { 
+    "Masala": {
+      description: "Cooked with a blend of spices, onions, tomatoes, and herbs. Originated from India/Pakistan",
+      path: 'models/masala.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+    "Curry": {
+      description: " A savory dish  simmered in a spiced sauce. Adapted worldwide",
+      path: 'models/cutty.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+    "Nihari": {
+      model: { path: 'models/nihari.glb', scale: '0.2 0.2 0.2', position: '0 0 0' },
+      description: "Stew of tender meat in a spiced gravy with ginger and calamansi",
+      path: 'models/nihari.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+    "Korma": {
+      description: "An Indian creamy dish cooked with yogurt  and mild spices",
+      path: 'models/korma.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    }
+  }
+},
+11: { // Maqloobah
+  variants: {
+    Chicken: { 
+      description: "Our Chicken Maqloobah is a traditional layered rice dish made with chicken, basmati rice, and vegetables all flipped upside down.",
+      path: 'models/maqloobahch-v4.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    Beef: { 
+      description: "Our Beef Maqloobah features tender beef layered with rice and vegetables cooked together then flipped for a hearty meal.",
+      path: 'models/maqloobahbeef-v5.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    Mutton: { 
+      description: "Our Mutton Maqloobah combines mutton with rice and layers of vegetables inverted after cooking.",
+      path: 'models/maqloobahmtn-v6.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    Shrimp: { 
+      description: "Our Shrimp Maqloobah is a seafood twist made with shrimp, seasoned rice, and layered vegetables flipped upside down.",
+      path: 'models/maqloobahshrimp-v7.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+   
+  }
+},
+12: { // Pastil
+    description: "A traditional dish from Mindanao in the Philippines.It consists of steamed rice topped with shredded chicken or beef.",
+    default: { path: 'models/pater.glb', scale: '0.2 0.2 0.2', position: '0 0 0' },
+  },
+13:{ // Pita
+  variants: {
+    "Chappati": {
+      description: "also known as roti made with wheat flour and can be enjoyed with various dishes",
+      path: 'models/chappati.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    "Paratha": {
+      description: " is a flatbread native to the Indian subcontinent. It can also be layared with cheese, butter, sugar, garlic, egg.",
+      path: 'models/paratha.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    "Khubz": {
+      description: "a white and round pita and can be enjoyed with various dishes.",
+      path: 'models/khubs.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+  }
+},
+14:  { // Shawarma Rice
+  variants: {
+    "Beef": {
+      description: "A Filipino take on the Middle Eastern classic, featuring  shawarma-style meat  served over a yellow spiced rice and salatah.",
+      path: 'models/shawricebeef-v2.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    "Chicken": {
+      description: "A Filipino take on the Middle Eastern classic, featuring  shawarma-style meat  served over a yellow spiced rice and salatah.",
+      path: 'models/shawricechik-v1.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+  }
+},
+15:  { // Shawarma
+  variants: {
+    "with Veggies": {
+      description: " A Middle Eastern delicacy made by marinated meat on a vertical strip. It is wrapped in flatbread with vegetables inside",
+      path: 'models/shawarmaveg-v10.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+    "with Fries": {
+      description: "  A Middle Eastern delicacy made by marinated meat on a vertical strip. It is wrapped in flatbread with fries inside",
+      path: 'models/shawarmafries-v11.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+  }
+},
+16:{ // Samosa
+    description: "Known for it’s triangular shape. A fried snack filled with spiced potatoes and green peas and can also include minced meat and cheese.",
+    default: { path: 'models/samosa2.glb', scale: '0.2 0.2 0.2', position: '0 0 0' },
+  },
+
+
+
+17:{ // Tikkah
+  variants: {
+    "with Khubz": {
+      description: "consists of marinated pieces of meat that are roasted & grilled, includes blend of spices served wiht pita.",
+      path: 'models/tikkakhubz-v1.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+    "with Rice": {
+      description: "consists of marinated pieces of meat that are roasted & grilled served with biryani rice.",
+      path: 'models/tikkarice-v2.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+  }
+},
+18:   { // Veggies
+  variants: {
+    "Bhindi": {
+      description: "Okra Masala, made with okra, spices, and herbs, partnered with khubz.",
+      path:'models/bhindi.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+    "Loki Kaddo": {
+      description: "Upo Masala , blend of bottle gourd in spiced masala, partnered with khubz.",
+      path:'models/lokikaddo.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+    "Karela": {
+      description: "Ampalaya Masala , a dish of bitter gourd in spiced masala, partnered with khubz.",
+      path:'models/karela.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+    "Mixed Veggies": {
+      description: "mix of fresh vegetables cooked in a spiced masala, partnered with khubz.",
+      path:'models/mixedmasala.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },"Vegetable Biryani": {
+      description: "basmati rice layered with mixed vegetables, herbs, and spices.",
+      path:'models/vegbiryani.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    }
+  }
+},
+19: { // Kabab
+  variants: {
+    "with Khubz": {
+      description: "Consisting of skewered or minced meat  seasoned with spices and herbs, then grilled or roasted and served with khubz(pita).",
+      path: 'models/kababkhubz-v11.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+    "with Rice": {
+      description: "Consisting of skewered or minced meat  seasoned with spices and herbs, then grilled and served with biryani rice.",
+      path: 'models/kababrice-v12.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+  }
+},
+ 20: { // Kabsah
+  variants: {
+    Chicken: { 
+      description: "Our Chicken Kabsah features grilled(faham), fried or roasted(shawayah) chicken served over basmati rice cooked with traditional Arabic seasonings.",
+      path: 'models/smallkabsah-v5.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    Beef: { 
+      description: "Our Beef Kabsah offers tender beef pieces paired with basmati rice, fries and Middle Eastern spices.",
+      path: 'models/smbeefkabsa-v6.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    Mutton: { 
+      description: "Our Mutton Kabsah features roasted or grilled mutton layered over basmati rice cooked with authentic Kabsah spices.",
+      path: 'models/smmtnkabsa-v7.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    Shrimp: { 
+      description: "Our Shrimp Kabsah is a seafood version, made with lightly roasted shrimp with basmati rice.",
+      path: 'models/smshrimpkabsa-v8.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+  }
+},
+21: { // Add-ons
+  variants: {
+    "Biryani Rice": {
+      description: "long-grain Basmati rice with flavors of saffron, spices, and herbs",
+      path: 'models/biryanirice.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    "Raita": {
+      description: "A yogurt sauce combined with fresh vegetables.",
+      path: 'models/raita.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    "Palapa": {
+      description: " Filipino condiment made primarily from sakurab, ginger, turmeric, chili, toasted coconut. Originated from Maranao tribe.",
+      path: 'models/palapa.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+     "Salatah": {
+      description: "A salad originating from the Middle East, commonly served as a side dish which typically includes fresh vegetables.",
+      path: 'models/salatah.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+     "Sauces": {
+      description: "White/Garlic sauce is condiment that is  often served as a dip. Red/Hot sauce is a spicy condiment made from a blend of chili and tomatoes.",
+      path: 'models/sauces.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+  }
+}
+ 
+};
+let currentMarker = null;
+let currentModel = null;
+let activeVariant = null;
+const firstModelLoadedMap = new Map();
+const preloadedModels = {}; // store loaded models per marker + variant key
+
+function loadModel(markerEntity, modelData = null, variants = {}, variantName = null) {
+  // --- Properly hide previous model (don’t unload yet) ---
+  if (currentModel) {
+    currentModel.object3D.visible = false;
+    currentModel = null;
+  }
+
+  // --- Clear content area ---
+  contentDiv.innerHTML = '';
+
+  // --- Handle main variants ---
+  if (!modelData && Object.keys(variants).length > 0) {
+    const title = document.createElement('h3');
+    title.textContent = 'Select Category:';
+    contentDiv.appendChild(title);
+
+    Object.keys(variants).forEach((name) => {
+      const btn = document.createElement('button');
+      btn.textContent = name;
+      btn.onclick = () => loadModel(markerEntity, variants[name], variants, name);
+      contentDiv.appendChild(btn);
+    });
+    return;
+  }
+
+  // --- Handle sizes ---
+  if (modelData.sizes) {
+    const title = document.createElement('h3');
+    title.textContent = modelData.description || 'Choose a size:';
+    contentDiv.appendChild(title);
+
+    Object.keys(modelData.sizes).forEach((size) => {
+      const btn = document.createElement('button');
+      btn.textContent = size;
+      btn.onclick = () => loadModel(markerEntity, modelData.sizes[size], modelData.sizes, size);
+      contentDiv.appendChild(btn);
+    });
+
+    const backBtn = document.createElement('button');
+    backBtn.textContent = '← Back';
+
+    if (modelData.options) {
+      backBtn.onclick = () => showMainVariants(markerEntity);
+    } else {
+      backBtn.onclick = () => loadModel(markerEntity, null, modelData.sizes);
+    }
+
+    contentDiv.appendChild(backBtn);
+    return;
+  }
+
+  // --- Prepare keys ---
+  const markerKey = markerEntity.dataset.id || markerEntity;
+  const modelKey = `${markerKey}_${variantName || ''}`;
+
+  // --- Loader setup ---
+  const loader = new THREE.GLTFLoader();
+  if (THREE.DRACOLoader) {
+    const draco = new THREE.DRACOLoader();
+    draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+    loader.setDRACOLoader(draco);
+  }
+
+  // --- Step 1: Show the selected model immediately ---
+  if (preloadedModels[modelKey]) {
+    Object.keys(preloadedModels).forEach((key) => {
+      if (key.startsWith(markerKey)) preloadedModels[key].object3D.visible = false;
+    });
+
+    preloadedModels[modelKey].object3D.visible = true;
+    currentModel = preloadedModels[modelKey];
+    contentDiv.innerHTML = '';
+    showModelDescription(modelData, variants, markerEntity);
+    window.addChangeViewButton(currentModel);
+
+    
+  } else {
+    // Not cached: show loading bar while loading the clicked one
+    const progressContainer = document.createElement('div');
+    progressContainer.style.width = '100%';
+    progressContainer.style.height = '20px';
+    progressContainer.style.border = '1px solid #333';
+    progressContainer.style.marginBottom = '10px';
+
+    const progressBar = document.createElement('div');
+    progressBar.style.width = '0%';
+    progressBar.style.height = '100%';
+    progressBar.style.backgroundColor = '#4caf50';
+    progressContainer.appendChild(progressBar);
+    contentDiv.appendChild(progressContainer);
+    contentDiv.appendChild(document.createTextNode('Loading 3D model...'));
+
+    const entity = document.createElement('a-entity');
+    entity.setAttribute('scale', modelData.scale || '0.2 0.2 0.2');
+    entity.setAttribute('position', modelData.position || '0 0 0');
+    markerEntity.appendChild(entity);
+
+    loader.load(
+  modelData.path,
+  (gltf) => {
+    entity.setObject3D('mesh', gltf.scene);
+    preloadedModels[modelKey] = entity;
+    currentModel = entity;
+    contentDiv.innerHTML = '';
+    showModelDescription(modelData, variants, markerEntity);
+    window.addChangeViewButton(currentModel);
+    markerEntity.dispatchEvent(new Event('model-loaded'));
+
+    // --- CHECK FOR GLITCHES AFTER MODEL IS SHOWN ---
+    setTimeout(() => {
+      const visibleModels = Object.values(preloadedModels).filter(m => m.object3D.visible);
+
+      if (!currentModel || !currentModel.object3D.visible || visibleModels.length > 1) {
+        // Only create overlay if it doesn't already exist
+        if (!document.getElementById('refresh-overlay')) {
+          const overlay = document.createElement('div');
+          overlay.id = 'refresh-overlay';
+          overlay.style.position = 'fixed';
+          overlay.style.top = '0';
+          overlay.style.left = '0';
+          overlay.style.width = '100%';
+          overlay.style.height = '100%';
+          overlay.style.backgroundColor = 'rgba(0,0,0,0.85)';
+          overlay.style.color = 'white';
+          overlay.style.display = 'flex';
+          overlay.style.justifyContent = 'center';
+          overlay.style.alignItems = 'center';
+          overlay.style.fontSize = '20px';
+          overlay.style.textAlign = 'center';
+          overlay.style.padding = '20px';
+          overlay.style.zIndex = '9999';
+          overlay.textContent = "There's something wrong, we will refresh the page to fix it...";
+
+          document.body.appendChild(overlay);
+
+          // Refresh after 4 seconds
+          setTimeout(() => location.reload(), 4000);
+        }
+      }
+    }, 1000); // check 1 second after model is visible
+  },
+  (xhr) => {
+    if (xhr.total) {
+      const percent = (xhr.loaded / xhr.total) * 100;
+      progressBar.style.width = percent + '%';
+    }
+  },
+  (error) => {
+    console.error('Error loading model', error);
+    contentDiv.innerHTML = 'Failed to load 3D model';
+  }
+);
+
+  }
+
+  // --- Step 2: Preload all other related models in background ---
+  if (!firstModelLoadedMap.get(markerKey)) {
+    firstModelLoadedMap.set(markerKey, true);
+
+    const modelsToPreload = [];
+    if (modelData.sizes) {
+      Object.keys(modelData.sizes).forEach((size) => {
+        const key = `${markerKey}_${size}`;
+        if (!preloadedModels[key]) {
+          modelsToPreload.push({ key, data: modelData.sizes[size] });
+        }
+      });
+    } else if (Object.keys(variants).length > 0) {
+      Object.keys(variants).forEach((vName) => {
+        const key = `${markerKey}_${vName}`;
+        if (vName !== variantName && !preloadedModels[key]) {
+          modelsToPreload.push({ key, data: variants[vName] });
+        }
+      });
+    }
+
+    modelsToPreload.forEach(({ key, data }) => {
+      const entity = document.createElement('a-entity');
+      entity.setAttribute('scale', data.scale || '0.2 0.2 0.2');
+      entity.setAttribute('position', data.position || '0 0 0');
+      entity.object3D.visible = false;
+      markerEntity.appendChild(entity);
+
+      loader.load(
+        data.path,
+        (gltf) => {
+          entity.setObject3D('mesh', gltf.scene);
+          preloadedModels[key] = entity;
+        },
+        undefined,
+        (error) => console.warn(`Background model ${key} failed to load`, error)
+      );
+    });
+  }
+}
+
+
+
+// Make the function global so other modules can call it
+window.addChangeViewButton = function(model) {
+  if (!model) return;
+
+  const container = document.getElementById('change-view-container');
+  if (!container) return;
+  container.innerHTML = ''; // clear previous button
+
+  const viewBtn = document.createElement('button');
+  viewBtn.id = 'change-view-btn';
+  viewBtn.textContent = 'Change View';
+
+  // Style so it’s always visible above AR scene
+  viewBtn.style.position = 'relative';
+  viewBtn.style.padding = '8px 12px';
+  viewBtn.style.fontSize = '16px';
+  viewBtn.style.backgroundColor = '#FFD700';
+  viewBtn.style.color = '#000';
+  viewBtn.style.border = 'none';
+  viewBtn.style.borderRadius = '5px';
+  viewBtn.style.cursor = 'pointer';
+  viewBtn.style.zIndex = '9999';
+  viewBtn.style.pointerEvents = 'auto';
+
+  const originalPos = model.getAttribute('position') || { x: 0, y: 0, z: 0 };
+  const views = [
+    { rotation: { x: 0, y: 0, z: 0 }, position: { x: originalPos.x, y: originalPos.y, z: originalPos.z } },
+    { rotation: { x: -80, y: 0, z: 0 }, position: { x: originalPos.x, y: originalPos.y + 1, z: originalPos.z } },
+    { rotation: { x: -50, y: 0, z: 0 }, position: { x: originalPos.x, y: originalPos.y + 1, z: originalPos.z } },
+    { rotation: { x: 0, y: 0, z: 90 }, position: { x: originalPos.x, y: originalPos.y + 1, z: originalPos.z } },
+    { rotation: { x: 0, y: 0, z: 180 }, position: { x: originalPos.x, y: originalPos.y + 1, z: originalPos.z } },
+  ];
+
+  let currentViewIndex = 0;
+
+  viewBtn.onclick = () => {
+    currentViewIndex = (currentViewIndex + 1) % views.length;
+    const view = views[currentViewIndex];
+    model.setAttribute('rotation', view.rotation);
+    model.setAttribute('position', view.position);
+  };
+
+  container.appendChild(viewBtn);
+};
+
+
+
+// ----------------------------
+// Show model description + back button
+// ----------------------------
+function showModelDescription(modelData, variants, markerEntity) {
+  const isSizeVariant = variants && variants["Budget"] && variants["Regular"];
+
+  // Show description
+  if (modelData.description) {
+    const desc = document.createElement('p');
+    desc.textContent = modelData.description;
+    contentDiv.appendChild(desc);
+  }
+
+  // Back button
+  const backBtn = document.createElement('button');
+  backBtn.textContent = '← Back';
+  backBtn.style.display = "block";
+  backBtn.style.margin = "15px auto 0 auto";
+
+  backBtn.onclick = () => {
+    const menu = markerMenu[currentMarker.dataset.index];
+
+    // Handle options menu (like Masala)
+    if (menu.options && Object.values(menu.options).includes(modelData)) {
+      showOptions(currentMarker.dataset.index);
+
+    // Handle size variants
+    } else if (isSizeVariant) {
+      const parentVariant = menu.variants["Sample Sizes"];
+      loadModel(markerEntity, parentVariant, menu.variants, "Sample Sizes");
+
+    // Handle main variants
+    } else if (menu.variants) {
+      showMainVariants(markerEntity);
+    }
+  };
+
+  contentDiv.appendChild(backBtn);
+}
+
+// ----------------------------
+// Show main variants
+// ----------------------------
+function showMainVariants(markerEntity) {
+  contentDiv.innerHTML = '';
+  const mainVariants = markerMenu[currentMarker.dataset.index].variants;
+
+  const title = document.createElement('h3');
+  title.textContent = 'Select Category:';
+  contentDiv.appendChild(title);
+
+  Object.keys(mainVariants).forEach(name => {
+    const btn = document.createElement('button');
+    btn.textContent = name;
+    btn.onclick = () => loadModel(markerEntity, mainVariants[name], mainVariants, name);
+    contentDiv.appendChild(btn);
+  });
+}
+
+// ----------------------------
+// Show drink categories
+// ----------------------------
+function showDrinkCategories(index) {
+  contentDiv.innerHTML = `<h3>Select a Drink</h3>`;
+
+  const categories = markerMenu[index].categories;
+
+  Object.keys(categories).forEach(category => {
+    const btn = document.createElement('button');
+    btn.textContent = category;
+    btn.onclick = () => showDrinkSizes(index, category);
+    contentDiv.appendChild(btn);
+  });
+
+  const backButton = document.createElement('button');
+  backButton.textContent = "⬅ Back";
+  backButton.style.display = "block";
+  backButton.style.margin = "15px auto 0 auto";
+  backButton.onclick = () => {
+    contentDiv.innerHTML = 'Scan the Menu';
+  };
+  contentDiv.appendChild(backButton);
+}
+
+// ----------------------------
+// Show drink sizes
+// ----------------------------
+function showDrinkSizes(index, category) {
+  contentDiv.innerHTML = `<h3>${category}</h3>`;
+
+  const categoryData = markerMenu[index].categories[category];
+
+  let variants, modelData;
+
+  if (["Lemonade", "Lassi", "Canned Soda", "Chai"].includes(category)) {
+    const firstKey = Object.keys(categoryData)[0];
+    modelData = categoryData[firstKey];
+    variants = { [firstKey]: modelData };
+  } else {
+    variants = categoryData;
+    const firstKey = Object.keys(variants)[0];
+    modelData = variants[firstKey];
+  }
+
+  loadModel(currentMarker, modelData, variants);
+
+  currentMarker.addEventListener('model-loaded', () => {
+    contentDiv.innerHTML = '';
+
+    const descDiv = document.createElement('div');
+    descDiv.id = 'description';
+    descDiv.textContent = markerMenu[index].categories[category].description || `Enjoy our ${category}!`;
+    contentDiv.appendChild(descDiv);
+
+    const backButton = document.createElement('button');
+    backButton.textContent = "⬅ Back";
+    backButton.style.display = "block";
+    backButton.style.margin = "15px auto 0 auto";
+    backButton.onclick = () => showDrinkCategories(index);
+    contentDiv.appendChild(backButton);
+  }, { once: true });
+}
+
+// ----------------------------
+// Show options menu (e.g., Masala, Curry, etc.)
+// ----------------------------
+function showOptions(index) {
+  contentDiv.innerHTML = `<h3>Select a Dish</h3>`;
+
+  const options = markerMenu[index].options;
+
+  const optionWrapper = document.createElement('div');
+  optionWrapper.style.display = "flex";
+  optionWrapper.style.justifyContent = "center";
+  optionWrapper.style.gap = "10px";
+  optionWrapper.style.flexWrap = "wrap";
+
+  Object.keys(options).forEach(optionName => {
+    const btn = document.createElement('button');
+    btn.textContent = optionName;
+
+    btn.onclick = () => {
+      const option = options[optionName];
+
+      if (currentModel) {
+        currentMarker.removeChild(currentModel);
+        currentModel = null;
+      }
+
+      loadModel(currentMarker, option.model, {}, null);
+
+      const showDescAndBack = () => {
+        contentDiv.innerHTML = '';
+
+        const descDiv = document.createElement('div');
+        descDiv.id = 'description';
+        descDiv.textContent = option.description;
+        contentDiv.appendChild(descDiv);
+
+        const backButton = document.createElement('button');
+        backButton.textContent = "⬅ Back";
+        backButton.style.display = "block";
+        backButton.style.margin = "15px auto 0 auto";
+        backButton.onclick = () => showOptions(index);
+        contentDiv.appendChild(backButton);
+
+        currentMarker.removeEventListener('model-loaded', showDescAndBack);
+      };
+
+      currentMarker.addEventListener('model-loaded', showDescAndBack);
+    };
+
+    optionWrapper.appendChild(btn);
+  });
+
+  contentDiv.appendChild(optionWrapper);
+}
+
+
+
+function disableScroll() {
+  document.body.style.overflow = 'hidden';
+  document.addEventListener('touchmove', preventDefault, { passive: false });
+  document.addEventListener('wheel', preventDefault, { passive: false });
+}
+
+function enableScroll() {
+  document.body.style.overflow = '';
+  document.removeEventListener('touchmove', preventDefault, { passive: false });
+  document.removeEventListener('wheel', preventDefault, { passive: false });
+}
+
+function preventDefault(e) {
+  e.preventDefault();
+}
+
+disableScroll();
+
+
+
+function showDescription(text) {
+  const descDiv = document.getElementById('description');
+  if(descDiv) descDiv.textContent = text;
+}
+
+function clearActiveButtons() {
+  document.querySelectorAll('#content button').forEach(b => b.classList.remove('active'));
+}
+
+document.querySelectorAll('[mindar-image-target]').forEach((marker, index) => {
+  marker.dataset.index = index;
+
+
+ marker.addEventListener('targetFound', async () => {
+      // If sizes marker (21) is detected, dynamically import the sizes module
+      if (index === 0) {
+        try {
+          // dynamic import — does NOT reload the page
+          const module = await import('./sizesLogic.js');
+          // call the exported function
+          module.loadSizesMarker(marker, contentDiv, markerMenu);
+        } catch (err) {
+          console.error('Failed to load sizesLogic module:', err);
+        }
+        return; // sizes marker handled here
+      }
+
+    
+  currentMarker = marker;
+  const menu = markerMenu[index];
+  if (!menu) return;
+
+  // 🥤 Drinks have categories
+  if (menu.categories) {
+    showDrinkCategories(index);
+    return;
+  }
+
+  //  Normal food with variants (Chicken, Beef, etc.)
+  if (menu.variants && Object.keys(menu.variants).length > 0) {
+    loadModel(marker, null, menu.variants);
+    return;
+  }
+
+  //  Simple dish (no variants, only one default model)
+  if (menu.default) {
+    // Load the model directly
+    loadModel(marker, menu.default, {});
+
+    marker.addEventListener('model-loaded', (e) => {
+
+      // Show description after model loads
+      contentDiv.innerHTML = '';
+      const descDiv = document.createElement('div');
+      descDiv.id = 'description';
+      descDiv.textContent = menu.description || '';
+      contentDiv.appendChild(descDiv);
+    }, { once: true });
+
+    return;
+  }
+});
+
+
+marker.addEventListener('targetLost', () => {
+  const markerKey = currentMarker?.dataset.id || marker;
+
+  // Hide & remove current model
+  if (currentModel) {
+    if (currentMarker) currentMarker.removeChild(currentModel);
+    currentModel = null;
+  }
+
+  // Remove all preloaded models for this marker
+  Object.keys(preloadedModels).forEach((key) => {
+    if (key.startsWith(markerKey)) {
+      const entity = preloadedModels[key];
+      if (entity.parentElement) entity.parentElement.removeChild(entity);
+      delete preloadedModels[key];
+    }
+  });
+
+  // Clear first model loaded flag
+  firstModelLoadedMap.delete(markerKey);
+
+  // Reset content
+  contentDiv.innerHTML = 'Scan the Menu';
+});
+
+});
+
+// Help Modal Slideshow Logic
+const modal = document.getElementById('helpModal');
+const helpBtn = document.getElementById('helpBtn');
+const closeModal = document.querySelector('.close');
+const slides = document.querySelectorAll('.slide');
+const nextBtn = document.getElementById('nextBtn');
+const prevBtn = document.getElementById('prevBtn');
+let currentSlide = 0;
+
+helpBtn.addEventListener('click', () => {
+  modal.style.display = 'block';
+  showSlide(currentSlide);
+});
+
+closeModal.addEventListener('click', () => {
+  modal.style.display = 'none';
+});
+
+window.addEventListener('click', (event) => {
+  if (event.target === modal) {
+    modal.style.display = 'none';
+  }
+});
+
+nextBtn.addEventListener('click', () => {
+  currentSlide = (currentSlide + 1) % slides.length;
+  showSlide(currentSlide);
+});
+
+prevBtn.addEventListener('click', () => {
+  currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+  showSlide(currentSlide);
+});
+
+function showSlide(index) {
+  slides.forEach((slide, i) => {
+    slide.classList.toggle('active', i === index);
+  });
+}
+
+// ✅ Hide the initial modal only on desktop
+window.addEventListener('load', () => {
+  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+  const helpModal = document.getElementById('helpModal');
+
+  if (!isMobile) {
+    // Desktop → hide initial modal
+    helpModal.style.display = 'none';
+  }
+});
+
+
+</script>
+
+
+<script>
+  const loadedMarkers = new Set(); 
+
+  window.addEventListener("load", () => {
+    Object.keys(markerMenu).forEach(index => {
+      const markerData = markerMenu[index];
+      const markerEntity = document.getElementById(`marker${index}`);
+      if (!markerEntity) return;
+
+      // When marker is first detected
+      markerEntity.addEventListener("targetFound", () => {
+        if (loadedMarkers.has(index)) return; 
+        loadedMarkers.add(index);
+
+        console.log(`📦 Loading first model for marker ${index}...`);
+
+        // Create <a-assets> if not present
+        let assetsContainer = document.getElementById("marker-assets");
+        if (!assetsContainer) {
+          assetsContainer = document.createElement("a-assets");
+          assetsContainer.id = "marker-assets";
+          document.querySelector("a-scene").appendChild(assetsContainer);
+        }
+
+        // Helper for model preloading
+        const preloadModel = (path) => {
+          if (!path) return;
+          const assetId = `model-${index}-${path.replace(/[^\w]/g, "")}`;
+          if (!document.getElementById(assetId)) {
+            const assetItem = document.createElement("a-asset-item");
+            assetItem.setAttribute("id", assetId);
+            assetItem.setAttribute("src", path);
+            assetsContainer.appendChild(assetItem);
+          }
+        };
+
+        // STEP 1️⃣: Load the main (visible) model immediately
+        if (markerData.default && markerData.default.path) {
+          preloadModel(markerData.default.path);
+        }
+
+        // STEP 2️⃣: Wait a short delay to preload others quietly
+        setTimeout(() => {
+          console.log(`⚙️ Preloading background models for marker ${index}...`);
+
+          // Preload models from "options"
+          if (markerData.options) {
+            Object.values(markerData.options).forEach(opt => {
+              if (opt.model && opt.model.path) preloadModel(opt.model.path);
+            });
+          }
+
+          // Preload from "variants" and "sizes"
+          if (markerData.variants) {
+            Object.values(markerData.variants).forEach(variant => {
+              if (variant.path) preloadModel(variant.path);
+              if (variant.sizes) {
+                Object.values(variant.sizes).forEach(size => preloadModel(size.path));
+              }
+            });
+          }
+
+          // Preload from "categories"
+          if (markerData.categories) {
+            Object.values(markerData.categories).forEach(cat => {
+              if (cat.Glass && cat.Glass.path) preloadModel(cat.Glass.path);
+            });
+          }
+
+          console.log(`✅ Background models for marker ${index} are now cached.`);
+        }, 1000); 
+      });
+    });
+  });
+</script>
+
+<script>
+function refreshScene() {
+  const scene = document.querySelector('a-scene');
+  
+  // Option 1: Soft reload (restarts MindAR tracking only)
+  if (scene && scene.systems['mindar-image']) {
+    scene.systems['mindar-image'].stop();
+    setTimeout(() => {
+      scene.systems['mindar-image'].start();
+      alert('Scene refreshed! Try scanning again.');
+    }, 500);
+  } else {
+    // Option 2: Hard reload if something went wrong
+    location.reload();
+  }
+}
+</script>
+
+
+
+</body>
+</html>
