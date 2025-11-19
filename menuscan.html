@@ -1361,11 +1361,10 @@ document.querySelectorAll('[mindar-image-target]').forEach((marker, index) => {
 
 
  marker.addEventListener('targetFound', async () => {
-      // If sizes marker (21) is detected, dynamically import the sizes module
       if (index === 0) {
         try {
           // dynamic import — does NOT reload the page
-          const module = await import('sizesLogic.js');
+          const module = await import('sizeslogic.js');
           // call the exported function
           module.loadSizesMarker(marker, contentDiv, markerMenu);
         } catch (err) {
@@ -1591,4 +1590,5 @@ function refreshScene() {
 
 </body>
 </html>
+
 
