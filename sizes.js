@@ -226,3 +226,4 @@ export async function loadSizesMarker(markerEntity, contentDiv, markerMenu) {
 
   return { loadModel, showMainCategories, showVariants };
 }
+
