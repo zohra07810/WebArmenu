@@ -324,6 +324,7 @@ button.active {
          device-orientation-permission-ui="enabled: false"
          style="width:100vw; height:100vh;">
 
+         
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
 
@@ -909,10 +910,12 @@ let activeVariant = null;
 const firstModelLoadedMap = new Map();
 const preloadedModels = {}; // store loaded models per marker + variant key
 
+
 function loadModel(markerEntity, modelData = null, variants = {}, variantName = null) {
 
-  if (currentModel) {
-    currentModel.object3D.visible = false;
+ if (currentModel) {
+    if (currentModel.parentElement) currentModel.parentElement.removeChild(currentModel);
+    delete preloadedModels[currentModel.dataset.key];
     currentModel = null;
   }
 
@@ -977,6 +980,7 @@ function loadModel(markerEntity, modelData = null, variants = {}, variantName = 
     contentDiv.innerHTML = '';
     showModelDescription(modelData, variants, markerEntity);
     window.addChangeViewButton(currentModel);
+    
     
   } else {
 
@@ -1112,11 +1116,7 @@ function loadModel(markerEntity, modelData = null, variants = {}, variantName = 
   }
 }
 
-
-
-
-
-// Make the function global so other modules can call it
+// Global function to add Change View button
 window.addChangeViewButton = function(model) {
   if (!model) return;
 
@@ -1128,7 +1128,7 @@ window.addChangeViewButton = function(model) {
   viewBtn.id = 'change-view-btn';
   viewBtn.textContent = 'Change View';
 
-  // Style so it’s always visible above AR scene
+  // Style
   viewBtn.style.position = 'relative';
   viewBtn.style.padding = '8px 12px';
   viewBtn.style.fontSize = '16px';
@@ -1141,16 +1141,30 @@ window.addChangeViewButton = function(model) {
   viewBtn.style.pointerEvents = 'auto';
 
   const originalPos = model.getAttribute('position') || { x: 0, y: 0, z: 0 };
-  const views = [
-    { rotation: { x: 0, y: 0, z: 0 }, position: { x: originalPos.x, y: originalPos.y, z: originalPos.z } },
-    { rotation: { x: -80, y: 0, z: 0 }, position: { x: originalPos.x, y: originalPos.y + 1, z: originalPos.z } },
-    { rotation: { x: -50, y: 0, z: 0 }, position: { x: originalPos.x, y: originalPos.y + 1, z: originalPos.z } },
-    { rotation: { x: 0, y: 0, z: 90 }, position: { x: originalPos.x, y: originalPos.y + 1, z: originalPos.z } },
-    { rotation: { x: 0, y: 0, z: 180 }, position: { x: originalPos.x, y: originalPos.y + 1, z: originalPos.z } },
-  ];
+
+  // Detect marker index via MindAR
+  const targetIndex = model.parentElement.components['mindar-image-target']?.data.targetIndex;
+
+  // Define movements based on marker
+  let views;
+  if (targetIndex === 5) {
+    // Custom movements for marker5
+    views = [
+      { rotation: { x: 0, y: 0, z: 90 }, position: { x: originalPos.x, y: originalPos.y, z: originalPos.z } },
+      { rotation: { x: 0, y:0, z: 0 }, position: { x: originalPos.x, y: originalPos.y , z: originalPos.z } },
+    ];
+  } else {
+    // Default movements for all other markers
+    views = [
+      { rotation: { x: 0, y: 0, z: 0 }, position: { x: originalPos.x, y: originalPos.y, z: originalPos.z } },
+      { rotation: { x: -80, y: 0, z: 0 }, position: { x: originalPos.x, y: originalPos.y + 1, z: originalPos.z } },
+      { rotation: { x: -50, y: 0, z: 0 }, position: { x: originalPos.x, y: originalPos.y + 1, z: originalPos.z } },
+      { rotation: { x: 0, y: 0, z: 90 }, position: { x: originalPos.x, y: originalPos.y + 1, z: originalPos.z } },
+      { rotation: { x: 0, y: 0, z: 180 }, position: { x: originalPos.x, y: originalPos.y + 1, z: originalPos.z } },
+    ];
+  }
 
   let currentViewIndex = 0;
-
   viewBtn.onclick = () => {
     currentViewIndex = (currentViewIndex + 1) % views.length;
     const view = views[currentViewIndex];
@@ -1376,44 +1390,41 @@ document.querySelectorAll('[mindar-image-target]').forEach((marker, index) => {
   marker.dataset.index = index;
 
 
- marker.addEventListener('targetFound', async () => {
-      if (index === 0) {
-        try {
-          // dynamic import — does NOT reload the page
-          const module = await import('./sizes.js');
-          // call the exported function
-          module.loadSizesMarker(marker, contentDiv, markerMenu);
-        } catch (err) {
-          console.error('Failed to load sizesLogic module:', err);
-        }
-        return; 
-      }
-
-    
+ // ===== TARGET FOUND =====
+marker.addEventListener('targetFound', async () => {
   currentMarker = marker;
   const menu = markerMenu[index];
   if (!menu) return;
 
-  // 🥤 Drinks have categories
+  // Dynamic import for drinks / sizes logic
+  if (index === 0) {
+    try {
+      const module = await import('./sizes.js');
+      module.loadSizesMarker(marker, contentDiv, markerMenu);
+    } catch (err) {
+      console.error('Failed to load sizesLogic module:', err);
+    }
+    return;
+  }
+
+  // Drinks with categories
   if (menu.categories) {
     showDrinkCategories(index);
     return;
   }
 
-  //  Normal food with variants (Chicken, Beef, etc.)
+  // Food with variants
   if (menu.variants && Object.keys(menu.variants).length > 0) {
     loadModel(marker, null, menu.variants);
     return;
   }
 
-  //  Simple dish (no variants, only one default model)
+  // Simple dish (no variants)
   if (menu.default) {
-    // Load the model directly
     loadModel(marker, menu.default, {});
 
+    // Optional: show description after model is fully loaded
     marker.addEventListener('model-loaded', (e) => {
-
-      // Show description after model loads
       contentDiv.innerHTML = '';
       const descDiv = document.createElement('div');
       descDiv.id = 'description';
@@ -1425,17 +1436,18 @@ document.querySelectorAll('[mindar-image-target]').forEach((marker, index) => {
   }
 });
 
-
+// ===== TARGET LOST =====
 marker.addEventListener('targetLost', () => {
   const markerKey = currentMarker?.dataset.id || marker;
 
-  // Hide & remove current model
+  // --- Remove current model completely ---
   if (currentModel) {
-    if (currentMarker) currentMarker.removeChild(currentModel);
+    if (currentModel.parentElement) currentModel.parentElement.removeChild(currentModel);
+    delete preloadedModels[currentModel.dataset.key];
     currentModel = null;
   }
 
-  // Remove all preloaded models for this marker
+  // --- Remove all other preloaded models for this marker ---
   Object.keys(preloadedModels).forEach((key) => {
     if (key.startsWith(markerKey)) {
       const entity = preloadedModels[key];
@@ -1444,12 +1456,11 @@ marker.addEventListener('targetLost', () => {
     }
   });
 
-  // Clear first model loaded flag
+  // --- Reset flags & content ---
   firstModelLoadedMap.delete(markerKey);
-
-  // Reset content
   contentDiv.innerHTML = 'Scan the Menu';
 });
+
 
 });
 
@@ -1585,6 +1596,8 @@ window.addEventListener('load', () => {
 </script>
 
 <script>
+
+
 function refreshScene() {
   const scene = document.querySelector('a-scene');
   
