@@ -1012,6 +1012,7 @@ function loadModel(markerEntity, modelData = null, variants = {}, variantName = 
     entity.setObject3D('mesh', gltf.scene);
     preloadedModels[modelKey] = entity;
     currentModel = entity;
+    progressBar.style.width = '100%';
     contentDiv.innerHTML = '';
     showModelDescription(modelData, variants, markerEntity);
     window.addChangeViewButton(currentModel);
@@ -1597,6 +1598,7 @@ function refreshScene() {
 
 </body>
 </html>
+
 
 
 
