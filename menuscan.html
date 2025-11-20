@@ -910,16 +910,14 @@ const firstModelLoadedMap = new Map();
 const preloadedModels = {}; // store loaded models per marker + variant key
 
 function loadModel(markerEntity, modelData = null, variants = {}, variantName = null) {
-  // --- Properly hide previous model (don’t unload yet) ---
+
   if (currentModel) {
     currentModel.object3D.visible = false;
     currentModel = null;
   }
 
-  // --- Clear content area ---
   contentDiv.innerHTML = '';
 
-  // --- Handle main variants ---
   if (!modelData && Object.keys(variants).length > 0) {
     const title = document.createElement('h3');
     title.textContent = 'Select Category:';
@@ -934,7 +932,6 @@ function loadModel(markerEntity, modelData = null, variants = {}, variantName = 
     return;
   }
 
-  // --- Handle sizes ---
   if (modelData.sizes) {
     const title = document.createElement('h3');
     title.textContent = modelData.description || 'Choose a size:';
@@ -960,11 +957,9 @@ function loadModel(markerEntity, modelData = null, variants = {}, variantName = 
     return;
   }
 
-  // --- Prepare keys ---
   const markerKey = markerEntity.dataset.id || markerEntity;
   const modelKey = `${markerKey}_${variantName || ''}`;
 
-  // --- Loader setup ---
   const loader = new THREE.GLTFLoader();
   if (THREE.DRACOLoader) {
     const draco = new THREE.DRACOLoader();
@@ -972,7 +967,6 @@ function loadModel(markerEntity, modelData = null, variants = {}, variantName = 
     loader.setDRACOLoader(draco);
   }
 
-  // --- Step 1: Show the selected model immediately ---
   if (preloadedModels[modelKey]) {
     Object.keys(preloadedModels).forEach((key) => {
       if (key.startsWith(markerKey)) preloadedModels[key].object3D.visible = false;
@@ -983,25 +977,57 @@ function loadModel(markerEntity, modelData = null, variants = {}, variantName = 
     contentDiv.innerHTML = '';
     showModelDescription(modelData, variants, markerEntity);
     window.addChangeViewButton(currentModel);
-
     
   } else {
-    // Not cached: show loading bar while loading the clicked one
-    const progressContainer = document.createElement('div');
-    progressContainer.style.width = '100%';
-    progressContainer.style.height = '20px';
-    progressContainer.style.border = '1px solid #333';
-    progressContainer.style.overflow= 'hidden';
-    progressContainer.style.marginBottom = '10px';
 
+    // ---- NEW CIRCULAR LOADER ----
+    const loaderWrapper = document.createElement("div");
+    loaderWrapper.style.cssText = `
+      width: 90px;
+      height: 90px;
+      margin: 15px auto;
+      position: relative;
+    `;
 
-    const progressBar = document.createElement('div');
-    progressBar.style.width = '0%';
-    progressBar.style.height = '100%';
-    progressBar.style.backgroundColor = '#4caf50';
-    progressContainer.appendChild(progressBar);
-    contentDiv.appendChild(progressContainer);
-    contentDiv.appendChild(document.createTextNode('Loading 3D model...'));
+    const baseCircle = document.createElement("div");
+    baseCircle.style.cssText = `
+      width: 100%;
+      height: 100%;
+      border: 6px solid #ccc;
+      border-radius: 50%;
+      box-sizing: border-box;
+      position: absolute;
+    `;
+
+    const progressCircle = document.createElement("div");
+    progressCircle.style.cssText = `
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      position: absolute;
+      background: conic-gradient(#4caf50 0deg, transparent 0deg);
+      transition: background 0.12s linear;
+    `;
+
+    const percentText = document.createElement("div");
+    percentText.style.cssText = `
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+      text-align: center;
+    `;
+    percentText.textContent = "0%";
+
+    loaderWrapper.appendChild(baseCircle);
+    loaderWrapper.appendChild(progressCircle);
+    loaderWrapper.appendChild(percentText);
+
+    contentDiv.textContent = "Loading Model...";
+    contentDiv.appendChild(loaderWrapper);
 
     const entity = document.createElement('a-entity');
     entity.setAttribute('scale', modelData.scale || '0.2 0.2 0.2');
@@ -1009,65 +1035,43 @@ function loadModel(markerEntity, modelData = null, variants = {}, variantName = 
     markerEntity.appendChild(entity);
 
     loader.load(
-  modelData.path,
-  (gltf) => {
-    entity.setObject3D('mesh', gltf.scene);
-    preloadedModels[modelKey] = entity;
-    currentModel = entity;
-    progressBar.style.width = '100%';
-    contentDiv.innerHTML = '';
-    showModelDescription(modelData, variants, markerEntity);
-    window.addChangeViewButton(currentModel);
-    markerEntity.dispatchEvent(new Event('model-loaded'));
+      modelData.path,
 
-    // --- CHECK FOR GLITCHES AFTER MODEL IS SHOWN ---
-    setTimeout(() => {
-      const visibleModels = Object.values(preloadedModels).filter(m => m.object3D.visible);
+      // --- SUCCESS CALLBACK ---
+      (gltf) => {
+        entity.setObject3D('mesh', gltf.scene);
+        preloadedModels[modelKey] = entity;
+        currentModel = entity;
 
-      if (!currentModel || !currentModel.object3D.visible || visibleModels.length > 1) {
-        // Only create overlay if it doesn't already exist
-        if (!document.getElementById('refresh-overlay')) {
-          const overlay = document.createElement('div');
-          overlay.id = 'refresh-overlay';
-          overlay.style.position = 'fixed';
-          overlay.style.top = '0';
-          overlay.style.left = '0';
-          overlay.style.width = '100%';
-          overlay.style.height = '100%';
-          overlay.style.backgroundColor = 'rgba(0,0,0,0.85)';
-          overlay.style.color = 'white';
-          overlay.style.display = 'flex';
-          overlay.style.justifyContent = 'center';
-          overlay.style.alignItems = 'center';
-          overlay.style.fontSize = '20px';
-          overlay.style.textAlign = 'center';
-          overlay.style.padding = '20px';
-          overlay.style.zIndex = '9999';
-          overlay.textContent = "There's something wrong, we will refresh the page to fix it...";
+        percentText.textContent = "100%";
+        progressCircle.style.background = `conic-gradient(#4caf50 360deg, transparent 360deg)`;
 
-          document.body.appendChild(overlay);
+        setTimeout(() => {
+          loaderWrapper.remove();
+          contentDiv.innerHTML = '';
+          showModelDescription(modelData, variants, markerEntity);
+          window.addChangeViewButton(currentModel);
+        }, 400);
+      },
 
-          // Refresh after 4 seconds
-          setTimeout(() => location.reload(), 4000);
+      // --- PROGRESS CALLBACK (with clamp fix) ---
+      (xhr) => {
+        if (xhr.lengthComputable) {
+          let percent = Math.min((xhr.loaded / xhr.total) * 100, 100);
+          percentText.textContent = Math.round(percent) + "%";
+          progressCircle.style.background =
+            `conic-gradient(#4caf50 ${(percent / 100) * 360}deg, transparent ${(percent / 100) * 360}deg)`;
         }
+      },
+
+      // --- ERROR CALLBACK ---
+      (error) => {
+        console.error('Error loading model', error);
+        contentDiv.innerHTML = '❌ Failed to load 3D model';
       }
-    }, 1000); // check 1 second after model is visible
-  },
-  (xhr) => {
-    if (xhr.total) {
-      const percent = (xhr.loaded / xhr.total) * 100;
-      progressBar.style.width = percent + '%';
-    }
-  },
-  (error) => {
-    console.error('Error loading model', error);
-    contentDiv.innerHTML = 'Failed to load 3D model';
-  }
-);
-
+    );
   }
 
-  // --- Step 2: Preload all other related models in background ---
   if (!firstModelLoadedMap.get(markerKey)) {
     firstModelLoadedMap.set(markerKey, true);
 
@@ -1107,6 +1111,8 @@ function loadModel(markerEntity, modelData = null, variants = {}, variantName = 
     });
   }
 }
+
+
 
 
 
@@ -1600,6 +1606,7 @@ function refreshScene() {
 
 </body>
 </html>
+
 
 
 
