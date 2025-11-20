@@ -78,6 +78,7 @@ export async function loadSizesMarker(markerEntity, contentDiv, markerMenu) {
     progressContainer.style.height = '20px';
     progressContainer.style.border = '1px solid #333';
     progressContainer.style.marginBottom = '10px';
+    progressContainer.style.overflow = 'hidden';
 
     const progressBar = document.createElement('div');
     progressBar.style.width = '0%';
@@ -226,4 +227,5 @@ export async function loadSizesMarker(markerEntity, contentDiv, markerMenu) {
 
   return { loadModel, showMainCategories, showVariants };
 }
+
 
