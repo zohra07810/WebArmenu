@@ -991,7 +991,9 @@ function loadModel(markerEntity, modelData = null, variants = {}, variantName = 
     progressContainer.style.width = '100%';
     progressContainer.style.height = '20px';
     progressContainer.style.border = '1px solid #333';
+    progressContainer.style.overflow= 'hidden';
     progressContainer.style.marginBottom = '10px';
+
 
     const progressBar = document.createElement('div');
     progressBar.style.width = '0%';
@@ -1598,6 +1600,7 @@ function refreshScene() {
 
 </body>
 </html>
+
 
 
 
