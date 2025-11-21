@@ -50,141 +50,178 @@ export async function loadSizesMarker(markerEntity, contentDiv, markerMenu) {
     backBtn.onclick = showMainCategories;
     contentDiv.appendChild(backBtn);
   }
+function loadModel(modelData, categoryName, variantName) {
+  const markerKey = markerEntity.dataset.id || `marker${markerEntity.dataset.index}`;
+  const modelKey = `${markerKey}_${categoryName}_${variantName}`;
 
-  function loadModel(modelData, categoryName, variantName) {
-    const markerKey = markerEntity.dataset.id || `marker${markerEntity.dataset.index}`;
-    const modelKey = `${markerKey}_${categoryName}_${variantName}`;
+  // Hide all other models
+  Object.keys(preloadedModels).forEach(key => {
+    preloadedModels[key].object3D.visible = false;
+  });
+  contentDiv.innerHTML = '';
 
-    // Hide other models
-    Object.keys(preloadedModels).forEach(key => {
-      preloadedModels[key].object3D.visible = false;
-    });
+  // Show cached model if available
+  if (preloadedModels[modelKey]) {
+    preloadedModels[modelKey].object3D.visible = true;
+    currentModel = preloadedModels[modelKey];
+    showModelDescription(modelData, variantName, categoryName);
+    addChangeViewButton();
+    preloadOtherVariants(categoryName, variantName);
+    return;
+  }
 
-    contentDiv.innerHTML = '';
+  // --- CIRCULAR LOADER ---
+  const loaderWrapper = document.createElement("div");
+  loaderWrapper.style.cssText = `
+    width: 90px;
+    height: 90px;
+    margin: 15px auto;
+    position: relative;
+  `;
 
-    // Show cached model if available
-    if (preloadedModels[modelKey]) {
-      preloadedModels[modelKey].object3D.visible = true;
-      currentModel = preloadedModels[modelKey];
-      showModelDescription(modelData, variantName, categoryName);
-      addChangeViewButton();
-      preloadOtherVariants(categoryName, variantName);
-      return;
-    }
+  const baseCircle = document.createElement("div");
+  baseCircle.style.cssText = `
+    width: 100%;
+    height: 100%;
+    border: 6px solid #ccc;
+    border-radius: 50%;
+    box-sizing: border-box;
+    position: absolute;
+  `;
 
-    // Loading bar for current model
-    const progressContainer = document.createElement('div');
-    progressContainer.style.width = '100%';
-    progressContainer.style.height = '20px';
-    progressContainer.style.border = '1px solid #333';
-    progressContainer.style.marginBottom = '10px';
-    progressContainer.style.overflow = 'hidden';
+  const progressCircle = document.createElement("div");
+  progressCircle.style.cssText = `
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    position: absolute;
+    background: conic-gradient(#4caf50 0deg, transparent 0deg);
+    transition: background 0.12s linear;
+  `;
 
-    const progressBar = document.createElement('div');
-    progressBar.style.width = '0%';
-    progressBar.style.height = '100%';
-    progressBar.style.backgroundColor = '#4caf50';
-    progressContainer.appendChild(progressBar);
-    contentDiv.appendChild(progressContainer);
-    contentDiv.appendChild(document.createTextNode('Loading 3D model...'));
+  const percentText = document.createElement("div");
+  percentText.style.cssText = `
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+  `;
+  percentText.textContent = "0%";
 
-    const entity = document.createElement('a-entity');
-    entity.setAttribute('scale', modelData.scale || '0.2 0.2 0.2');
-    entity.setAttribute('position', modelData.position || '0 0 0');
-    entity.object3D.visible = false;
-    markerEntity.appendChild(entity);
+  loaderWrapper.appendChild(baseCircle);
+  loaderWrapper.appendChild(progressCircle);
+  loaderWrapper.appendChild(percentText);
 
-    const loader = new THREE.GLTFLoader();
-    if (THREE.DRACOLoader) {
-      const draco = new THREE.DRACOLoader();
-      draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
-      loader.setDRACOLoader(draco);
-    }
+  contentDiv.textContent = "Loading 3D model...";
+  contentDiv.appendChild(loaderWrapper);
 
-    loader.load(
-      modelData.path,
-      gltf => {
-        entity.setObject3D('mesh', gltf.scene);
-        entity.object3D.visible = true;
-        preloadedModels[modelKey] = entity;
-        currentModel = entity;
+  // --- Create entity ---
+  const entity = document.createElement('a-entity');
+  entity.setAttribute('scale', modelData.scale || '0.2 0.2 0.2');
+  entity.setAttribute('position', modelData.position || '0 0 0');
+  entity.object3D.visible = false;
+  markerEntity.appendChild(entity);
+
+  // --- Loader setup ---
+  const loader = new THREE.GLTFLoader();
+  if (THREE.DRACOLoader) {
+    const draco = new THREE.DRACOLoader();
+    draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+    loader.setDRACOLoader(draco);
+  }
+
+  loader.load(
+    modelData.path,
+    gltf => {
+      entity.setObject3D('mesh', gltf.scene);
+      entity.object3D.visible = true;
+      preloadedModels[modelKey] = entity;
+      currentModel = entity;
+
+      percentText.textContent = "100%";
+      progressCircle.style.background = `conic-gradient(#4caf50 360deg, transparent 360deg)`;
+
+      setTimeout(() => {
+        loaderWrapper.remove();
         contentDiv.innerHTML = '';
         showModelDescription(modelData, variantName, categoryName);
         addChangeViewButton();
 
-         setTimeout(() => {
-  const visibleModels = Object.values(preloadedModels).filter(
-    (m) => m.object3D.visible
-  );
-
-  if (!currentModel || !currentModel.object3D.visible || visibleModels.length > 1) {
-    // Create overlay div
-    let overlay = document.createElement('div');
-    overlay.id = 'refresh-overlay';
-    overlay.style.position = 'fixed';
-    overlay.style.top = '0';
-    overlay.style.left = '0';
-    overlay.style.width = '100%';
-    overlay.style.height = '100%';
-    overlay.style.backgroundColor = 'rgba(0,0,0,0.8)';
-    overlay.style.color = 'white';
-    overlay.style.display = 'flex';
-    overlay.style.justifyContent = 'center';
-    overlay.style.alignItems = 'center';
-    overlay.style.fontSize = '24px';
-    overlay.style.zIndex = '9999';
-    overlay.textContent = "There's something wrong, we will refresh...";
-
-    document.body.appendChild(overlay);
-
-    // Wait 3 seconds, then refresh
-    setTimeout(() => location.reload(), 3000);
-  }
-}, 3000);
-
-        // Preload other variants silently
-        preloadOtherVariants(categoryName, variantName);
-      },
-      xhr => {
-        if (xhr.total) progressBar.style.width = (xhr.loaded / xhr.total) * 100 + '%';
-      },
-      err => {
-        console.error('Failed to load model', err);
-        contentDiv.innerHTML = 'Failed to load 3D model';
-      }
-    );
-  }
-
-  function preloadOtherVariants(categoryName, activeVariantName) {
-    const variants = markerMenu[markerEntity.dataset.index].categories[categoryName].variants;
-    const loader = new THREE.GLTFLoader();
-    if (THREE.DRACOLoader) {
-      const draco = new THREE.DRACOLoader();
-      draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
-      loader.setDRACOLoader(draco);
-    }
-
-    Object.keys(variants).forEach(vName => {
-      if (vName !== activeVariantName) {
-        const key = `${markerEntity.dataset.id || `marker${markerEntity.dataset.index}`}_${categoryName}_${vName}`;
-        if (!preloadedModels[key]) {
-          const vData = variants[vName];
-          const e = document.createElement('a-entity');
-          e.setAttribute('scale', vData.scale || '0.2 0.2 0.2');
-          e.setAttribute('position', vData.position || '0 0 0');
-          e.object3D.visible = false;
-          markerEntity.appendChild(e);
-
-          loader.load(
-            vData.path,
-            gltf => { e.setObject3D('mesh', gltf.scene); preloadedModels[key] = e; },
-            undefined,
-            err => console.warn(`Failed to preload ${key}`, err)
-          );
+        // Optional: check for glitches
+        const visibleModels = Object.values(preloadedModels).filter(m => m.object3D.visible);
+        if (!currentModel || !currentModel.object3D.visible || visibleModels.length > 1) {
+          let overlay = document.createElement('div');
+          overlay.id = 'refresh-overlay';
+          overlay.style.cssText = `
+            position: fixed;
+            top:0; left:0;
+            width:100%; height:100%;
+            background-color: rgba(0,0,0,0.8);
+            color:white; display:flex;
+            justify-content:center;
+            align-items:center;
+            font-size:24px; z-index:9999;
+          `;
+          overlay.textContent = "There's something wrong, we will refresh...";
+          document.body.appendChild(overlay);
+          setTimeout(() => location.reload(), 3000);
         }
+      }, 400);
+
+      // Preload other variants silently
+      preloadOtherVariants(categoryName, variantName);
+    },
+    xhr => {
+      if (xhr.lengthComputable) {
+        let percent = Math.min((xhr.loaded / xhr.total) * 100, 100);
+        percentText.textContent = Math.round(percent) + "%";
+        progressCircle.style.background =
+          `conic-gradient(#4caf50 ${(percent / 100) * 360}deg, transparent ${(percent / 100) * 360}deg)`;
       }
-    });
+    },
+    err => {
+      console.error('Failed to load model', err);
+      contentDiv.innerHTML = '❌ Failed to load 3D model';
+    }
+  );
+}
+
+// --- Preload other variants function ---
+function preloadOtherVariants(categoryName, activeVariantName) {
+  const variants = markerMenu[markerEntity.dataset.index].categories[categoryName].variants;
+  const loader = new THREE.GLTFLoader();
+  if (THREE.DRACOLoader) {
+    const draco = new THREE.DRACOLoader();
+    draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+    loader.setDRACOLoader(draco);
   }
+
+  Object.keys(variants).forEach(vName => {
+    if (vName !== activeVariantName) {
+      const key = `${markerEntity.dataset.id || `marker${markerEntity.dataset.index}`}_${categoryName}_${vName}`;
+      if (!preloadedModels[key]) {
+        const vData = variants[vName];
+        const e = document.createElement('a-entity');
+        e.setAttribute('scale', vData.scale || '0.2 0.2 0.2');
+        e.setAttribute('position', vData.position || '0 0 0');
+        e.object3D.visible = false;
+        markerEntity.appendChild(e);
+
+        loader.load(
+          vData.path,
+          gltf => { e.setObject3D('mesh', gltf.scene); preloadedModels[key] = e; },
+          undefined,
+          err => console.warn(`Failed to preload ${key}`, err)
+        );
+      }
+    }
+  });
+}
+
 
   function addChangeViewButton() {
     if (!currentModel) return;
@@ -227,5 +264,6 @@ export async function loadSizesMarker(markerEntity, contentDiv, markerMenu) {
 
   return { loadModel, showMainCategories, showVariants };
 }
+
 
 
