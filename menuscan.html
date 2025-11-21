@@ -914,8 +914,7 @@ const preloadedModels = {}; // store loaded models per marker + variant key
 function loadModel(markerEntity, modelData = null, variants = {}, variantName = null) {
 
  if (currentModel) {
-    if (currentModel.parentElement) currentModel.parentElement.removeChild(currentModel);
-    delete preloadedModels[currentModel.dataset.key];
+    currentModel.object3D.visible = false;
     currentModel = null;
   }
 
@@ -1619,6 +1618,7 @@ function refreshScene() {
 
 </body>
 </html>
+
 
 
 
