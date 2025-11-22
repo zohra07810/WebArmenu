@@ -1,902 +1,1653 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Baig's Restaurant</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AR Menu</title>
+<script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-  <!-- Bootstrap CSS -->
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet"/>
-  <!-- Swiper CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
-  <!-- Swiper JS -->
-  <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+<style>
+html, body { margin:0; padding:0; width:100%;    min-height: 100vh; overflow:hidden; }
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
 
-    html, body {
-      margin: 0;
-      padding: 0;
-      overflow-x: hidden !important;
-      width: 100%;
-      max-width: 100%;
-      scroll-behavior: smooth;
-      font-family: 'Poppins', sans-serif;
-    }
-
-    h1 {
-    transition: opacity 0.5s ease;
-    opacity: 1;
-    }
-     .fade-out {
-    opacity: 0;
-    }
-
-    header {
-      position: fixed;
-      top: 0;
-      width: 100%;
-      background-color: white;
-      padding: 15px 30px;
-      display: none;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 1000;
-      transition: padding 0.3s ease;
-    }
-    header.shrink {
-      padding: 5px 30px;
-      display: flex;
-    }
-    .header-logo {
-      width: 120px;
-    }
-
-    .header-link {
-      background: none;
-      color: #000;
-      font-weight: 500;
-      font-size: 15px;
-      margin: 0 12px;
-      border: none;
-      text-decoration: none;
-      transition: color 0.3s ease;
-    }
-    .header-link:hover {
-      color: #c0392b;
-    }
-
-    .btn-custom {
-      background-color: #fdf90f;
-      color: #000;
-      font-weight: 500;
-      font-size: 14px;
-      padding: 6px 12px;
-      border-radius: 4px;
-      border: none;
-      text-decoration: none;
-      text-shadow: none;
-      box-shadow: none;
-      transition: background-color 0.3s;
-    }
-    .btn-custom:hover {
-      background-color: #c0392b;
-      color: #fff;
-    }
-
-    .hamburger {
-      display: none;
-      flex-direction: column;
-      cursor: pointer;
-    }
-    .hamburger div {
-      width: 25px;
-      height: 3px;
-      background-color: black;
-      margin: 4px;
-      transition: all 0.3s ease;
-    }
-
-    /* Mobile menu */
-    .header-buttons.show {
-      display: flex;
-      flex-direction: column;
-      background: white;
-      position: absolute;
-      top: 60px;
-      right: 20px;
-      border-radius: 8px;
-      padding: 10px;
-    }
-
-    .hero-bg {
-      background-image: url('./images/resto.jpg');
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed; 
-      height: 100vh;
-      width: 100%;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      color: white;
-      text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
-      overflow: hidden;
-    }
-
-    .hero-text {
-      margin-top: -50px;
-    }
-    .hero-text h1 {
-      font-size: 3rem;
-      margin-bottom: 10px;
-    }
-    .hero-text p {
-      font-size: 1.2rem;
-      margin-bottom: 10px;
-    }
-    .hero-buttons {
-      margin-top: 20px;
-    }
-
-    /* General Sections */
-    .content-section {
-      background-color: white;
-      padding: 80px 20px;
-      text-align: center;
-    }
-    .content-section:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-    .content-section h3 {
-      color: #000000;
-      margin-bottom: 20px;
-    }
-    .content-section p {
-      font-size: 18px;
-      max-width: 800px;
-      margin: 0 auto;
-      line-height: 1.6;
-    }
-
-    /* Menu Section */
-    #menu {
-      background: #ffffff;
-    }
-    #menu h3 {
-      color: #000;
-      font-weight: 600;
-      margin-bottom: 30px;
-    }
-    #menu .carousel {
-      max-width: 100%;
-      border: 1px solid #e5e5e5;
-      background: #fff;
-      border-radius: 12px;
-    }
-    #menu .carousel-inner img {
-      width: 100%;
-      border-radius: 12px;
-    }
-    #menu .carousel-control-prev-icon,
-    #menu .carousel-control-next-icon {
-      background-color: #227925;
-      border-radius: 50%;
-      padding: 10px;
-    }
-    #menu .col-md-5 img {
-      max-width: 90%;
-      height: auto;
-      border-radius: 12px;
-    }
-
-    /* Make carousel arrows subtle */
-#menu .swiper-button-next,
-#menu .swiper-button-prev {
-  color: #444;             
-  opacity: 0.6;            
-  transition: all 0.3s ease;
-  transform: scale(0.8);   
-}
-
-/* On hover, make them clearer */
-#menu .swiper-button-next:hover,
-#menu .swiper-button-prev:hover {
-  opacity: 1;
-  color: #227925;          
-  transform: scale(1);    
+#content {
+  position:absolute;
+  bottom:10px; left:50%;
+  transform:translateX(-50%);
+  background:rgba(0,0,0,0.7);
+  color:#fff;
+  padding: 5px 10px;  
+  border-radius:8px;
+  z-index:999;
+  width: auto;             
+  max-width: 95%;  
+  text-align:center;
+  display: flex;
+  flex-direction: column; 
+  align-items: center;
+  transition: width 0.3s ease;
 }
 
 
-    footer {
-      background-color: #333;
-      color: white;
-      padding: 30px 0;
-      text-align: center;
-    }
-    footer a {
-      color: #f1f1f1;
-      text-decoration: none;
-      margin: 0 5px;
-      font-size: 14px;
-    }
-    footer a:hover {
-      color: #ff0a0a;
-    }
 
-    /* Modal Styles */
+ #content span {
+    font-size: 14px;
+  }
+
+
+button {
+  margin:6px;
+  padding:12px 18px;
+  cursor:pointer;
+  border:none;
+  border-radius:6px;
+  background:#5a4d35; 
+  color:#fff;
+  font-size:16px;
+  transition: background 0.3s;
+}
+button.active {
+  background: yellow;   
+  color: black;        
+}
+#size-buttons {
+  display: flex;    
+  justify-content: center;
+  margin-top:6px;
+  gap: 8px;           
+}
+#description {
+  margin-top:10px;
+  font-size:15px;
+  color:#ffd;
+  text-align:center;
+  white-space: normal;     
+  white-space: pre-line; 
+  max-width: 600px;    
+}
+
+@media screen and (max-width: 480px) {
+  #content {
+    padding: 6px 8px;
+  }
+
+  #description {
+    font-size: 14px;
+    max-width: 95vw;   
+  }
+}
+
+/* Back button */
+#back-btn {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 10px 16px;
+  font-size: 15px;
+  font-weight: bold;
+  background: black;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 1000;
+  transition: background 0.3s, transform 0.2s;
+}
+#back-btn:hover {
+  background: #e9e51f;
+  color: black;
+  transform: scale(1.05);
+}
+
+/* Help Button */
+#helpBtn {
+  background: #e9e51f;
+  border: none;
+  border-radius: 6px;
+  color: black;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+#helpBtn:hover {
+  background: #333;
+  color: rgb(255, 255, 255);
+}
+
+/* Modal Background (Overlay) */
 .modal {
-  display: none; 
-  position: fixed; 
-  z-index: 2000; 
-  padding-top: 60px; 
-  left: 0;
+  display: none;
+  position: fixed;
+  z-index: 999999;
   top: 0;
-  width: 100%; 
-  height: 100%; 
-  overflow: auto;
-  background-color: rgba(0,0,0,0.8); 
+  left: 0;
+  width: 100vw; 
+  height: 100vh;            
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;  
+  align-items: center;      
+  padding: 16px;             
+  box-sizing: border-box;
+  pointer-events: all;
 }
 
+/* Modal Container */
 .modal-content {
-  margin: auto;
-  display: block;
-  max-width: 90%; 
-  max-height: 80vh; 
-  border-radius: 12px;
-  width: auto;    
-  height: auto;   
+  background-color: #fff;
+  border-radius: 14px;
+  width: 90%;               
+  max-width: 380px;         
+  padding: 20px;
+  text-align: center;
+  color: #333;
+  position: relative;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+
+  transform: translateY(1px);
 }
 
+/* Close Button */
+.close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  font-size: 26px;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+}
 
-.modal-buttons {
-  text-align: center;
+/* Slides */
+.slide {
+  display: none;
+}
+
+.slide.active {
+  display: block;
+}
+
+.slide img {
+  width: 100%;
+  max-height: 230px;
+  object-fit: contain;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  background: #f5f5f5;
+}
+
+/* Buttons */
+.nav-buttons {
+  display: flex;
+  justify-content: space-between;
   margin-top: 15px;
 }
 
-.modal-buttons .btn-custom {
-  margin: 5px 10px;
-  font-size: 16px;
-  padding: 8px 18px;
-}
-
-@media (max-width: 768px) {
-  .modal-buttons .btn-custom {
-    font-size: 14px;
-    padding: 6px 12px;
-  }
-}
-
-/* Close button */
-.close {
-  position: absolute;
-  top: 20px;
-  right: 35px;
-  color: rgb(255, 255, 255);
-  font-size: 40px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-.close:hover {
-  color: #f1f1f1;
-}
-
-
-.swiper-button-next,
-.swiper-button-prev {
-  color: #000000; 
-}
-
-@media (min-width: 992px) {
-  .swiper-slide img {
-    max-height: 600px;     
-    width: auto;           
-    object-fit: contain;   
-  }
-
-  .swiper-slide {
-    display: flex;
-    justify-content: center; 
-    align-items: center;
-  }
-}
-
-@media (max-width: 1024px) {
-      /* Disable parallax on tablets and phones */
-  .hero-bg {
-     background-attachment: scroll;
-      }
-    }
-
-@media (max-width: 768px) {
-  .header-logo {
-    width: 80px;
-    }
-  .hamburger {
-     display: flex;
-    }
-  .header-buttons {
-     display: none;
-    }
-  .header-link {
-     margin: 10px 0;
-     font-size: 16px;
-    }
-  .hero-text h1 {
-     font-size: 2rem;
-    }
-  .hero-text {
-     margin-top: -120px;
-     padding: 0 10px;
-    }
-  .content-section {
-     padding: 60px 15px;
-    }
-  #menu .row {
-     flex-direction: column;
-     text-align: center;
-    }
-  #menu .col-md-5 {
-    margin-bottom: 20px;
-    }
-  #menu .carousel-inner img {
-     max-height: 300px;
-     object-fit: cover;
-    }
-  #menu p {
-     font-size: 16px;
-    }
-}
-
-  #how-it-works img {
-   border-radius: 12px;
-   box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-   margin-top: 20px;
-}
-
-@media (max-width: 768px) {
-  #how-it-works .row {
-    flex-direction: column-reverse;
-    text-align: center;
-  }
-  #how-it-works img {
-    margin-top: 15px;
-    max-height: 300px;
-  }
-}
-
-#how-it-works .card {
-  background-color: #c0392b; 
-  color: white;              
-}
-
-#how-it-works .card .btn-custom {
-  background-color: #fdf90f; 
-}
-
-#how-it-works .card .btn-custom:hover {
-  background-color: #900000; 
+.nav-buttons button {
+  background-color: #3a3a3a;
   color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
 }
 
-@media (min-width: 992px) {
-  #scanMenuCarousel .carousel-item img {
-    max-height: 300px; 
-    width: auto;    
-    margin: 0 auto;  
+.nav-buttons button:hover {
+  background-color: #e9e51f;
+  color: black;
+}
+
+/* Extra safety for very small screens */
+@media (max-width: 400px) {
+  .modal-content {
+    width: 95%;
+    padding: 16px;
+  }
+  .slide img {
+    max-height: 180px;
   }
 }
 
-  </style>
-</head>
 
+#refreshBtn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 10px 16px;
+  font-size: 15px;
+  font-weight: bold;
+  background: #070707;
+  color: rgb(248, 248, 248);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 1000;
+  transition: background 0.3s, transform 0.2s;
+}
+#refreshBtn:hover {
+  background: #333;
+  color: white;
+  transform: scale(1.05);
+}
+
+  #progressBar {
+  width: 0%;
+  max-width: 100%;
+  transition: width .2s ease;
+  overflow: hidden;
+}
+
+</style>
+</head>
 <body>
 
-  <!-- Header -->
-  <header>
-    <img src="images/baigsLogo.png" alt="Baig's Restaurant Logo" class="header-logo">
-    <div class="hamburger" id="hamburger">
-      <div></div><div></div><div></div>
-    </div>
-    <div class="header-buttons" id="headerButtons">
-      <a href="#home" class="header-link">Home</a>
-      <a href="#menu" class="header-link">Our Menu</a>
-      <a href="#how-it-works" class="header-link">How To Use</a>
-      <a href="#about-ar" class="header-link">What Is AR?</a>
-      <a href="#about-us" class="header-link">About Us</a>
-    </div>
-  </header>
+<button id="back-btn" onclick="window.location.href='index.html'">← Back to Main</button>
+<button id="refreshBtn" onclick="refreshScene()">🔄 Refresh Scene</button>
 
-  <!-- Hero Section -->
-  <div class="hero-bg" id="home">
-    <div class="hero-text">
-      <img src="images/baigsLogo.png" alt="Baig's Logo" class="hero-logo" style="width:220px;">
-      <h1 id="animatedText">Welcome to Baig's Restaurant</h1>
-      <p>Bringing Every Dish to Life with AR!</p>
-      <div class="hero-buttons">
-         <a href="#scanMenuCard" class="btn btn-custom">Scan Now</a>
-         <a href="#viewMenuCard" class="btn btn-custom">View in AR</a>
-      </div>
-    </div>
+<!-- Add this in your HTML somewhere -->
+<div id="change-view-container" style="position: absolute; top: 55px; right: 10px; z-index: 1000;"></div>
+
+<div id="content">
+  <div style="display:flex; align-items:center; gap:10px;">
+    <span>Please wait..</span>
+    <button id="helpBtn">Help</button>
   </div>
+</div>
 
-  <!-- OUR MENU -->
-<section id="menu" class="content-section">
-  <div class="container">
-    <h3>Not Your Ordinary Menu</h3>
-    <div class="row align-items-center mt-5">
-      <div class="col-md-5 text-center mb-4 mb-md-0">
-        <img src="images/zpng3.png" alt="Biryani" class="img-fluid">
-      </div>
-      <div class="col-md-7">
-        <!-- Swiper Coverflow -->
-        <div class="swiper mySwiper" style="padding: 20px; border-radius: 12px; background: white;">
-          <div class="swiper-wrapper">
-            <div class="swiper-slide" style="border-radius: 10px;">
-              <img src="images/menu1.png" alt="Mixed Vegetable Masala" style="width: 100%; max-height: 500px; object-fit: cover; border-radius: 10px;">
-            </div>
-            <div class="swiper-slide" style="border-radius: 10px;">
-              <img src="images/menu3.jpg" alt="Mixed Vegetable Masala" style="width: 100%; max-height: 500px; object-fit: cover; border-radius: 10px;">
-            </div>
-            <div class="swiper-slide" style="border-radius: 10px;">
-              <img src="images/menu2.jpg" alt="Loki Kaddo Masala" style="width: 100%; max-height: 500px; object-fit: cover; border-radius: 10px;">
-            </div>
-            <div class="swiper-slide" style="border-radius: 10px;">
-              <img src="images/menu4.jpg" alt="Loki Kaddo Masala" style="width: 100%; max-height: 500px; object-fit: cover; border-radius: 10px;">
-            </div>
-            <div class="swiper-slide" style="border-radius: 10px;">
-              <img src="images/menu5.jpg" alt="Loki Kaddo Masala" style="width: 100%; max-height: 500px; object-fit: cover; border-radius: 10px;">
-            </div>
-            <div class="swiper-slide" style="border-radius: 10px;">
-              <img src="images/menu6.jpg" alt="Loki Kaddo Masala" style="width: 100%; max-height: 500px; object-fit: cover; border-radius: 10px;">
-            </div>
-            <div class="swiper-slide" style="border-radius: 10px;">
-              <img src="images/menu7.jpg" alt="Loki Kaddo Masala" style="width: 100%; max-height: 500px; object-fit: cover; border-radius: 10px;">
-            </div>
-          </div>
-
-          <div class="swiper-button-next"></div>
-          <div class="swiper-button-prev"></div>
-          <div class="swiper-pagination"></div>
-        </div>
-        <p class="mt-3 text-center">
-          View the essence of Arab-Pakistani-Indian Cuisines. Scan the menu or view it in AR to see every dish in 3D.
-        </p>
-
-      </div>
-    </div>
+ <!-- Description container -->
+  <div id="description-container" style="display:none;">
+    <p id="description"></p>
   </div>
-</section>
+</div>
 
+<div id="nutrition-container" style="display:none; text-align:center; margin-top:10px;">
+  <canvas id="nutrition-chart" width="300" height="300"></canvas>
+</div>
 
-<!-- Image Modal -->
-<div id="imageModal" class="modal">
-  <span class="close">&times;</span>
-  <img class="modal-content" id="modalImg">
-  <div class="modal-buttons">
-     <a href="#scanMenuCard" class="btn btn-custom">Scan Now</a>
-     <a href="#viewMenuCard" class="btn btn-custom">View AR</a>
+<!-- Help Modal -->
+<div id="helpModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>How to Use the Scanner</h2>
+
+    <!-- Slides -->
+    <div class="slide active">
+      <img src="images/scanfirst.png" alt="Step 1">
+      <p>Step 1: Wait for the loading circle to change into a scanner before you start scanning.</p>
+    </div>
+
+    <div class="slide">
+      <img src="images/scan1.jpg" alt="Step 2">
+      <p>Step 2: Each food category is a marker. Scan a category name and keep your phone steady after scanning.</p>
+    </div>
+
+    <div class="slide">
+      <img src="images/menusize.jpg" alt="Step 3">
+      <p>Step 2: Scan this whole page to see different sizes options.</p>
+    </div>
+
+    <div class="slide">
+      <img src="images/scan3.jpg" alt="Step 4">
+      <p>Step 3: Click your preferred option. Keep your phone steady.</p>
+    </div>
+
+    <div class="slide">
+      <img src="images/scan4.jpg" alt="Step 5">
+      <p>Step 4: The 3D model and its description will appear shortly. If it takes too long to load, move your phone away and scan again.</p>
+    </div>
+
+    <div class="slide">
+      <img src="images/scanbm.png" alt="Step 6">
+      <p>To scan another menu, simply move your phone to a different food category name.</p>
+    </div>
+
+    <div class="slide">
+      <img src="images/scankm.jpg" alt="Step 7">
+      <p>To scan another menu, simply move your phone to a different food category name.</p>
+    </div>
+
+    <div class="slide">
+      <img src="images/scankt.jpg" alt="Step 8">
+      <p>To scan another menu, simply move your phone to a different food category name.</p>
+    </div>
+
+    <div class="slide">
+      <img src="images/scanmasala.jpg" alt="Step 9">
+      <p>To scan another menu, simply move your phone to a different food category name.</p>
+    </div>
+
+    <div class="slide">
+      <img src="images/scanmbp.jpg" alt="Step 10">
+      <p>To scan another menu, simply move your phone to a different food category name.</p>
+    </div>
+
+    <div class="slide">
+      <img src="images/scanvegshaw.jpg" alt="Step 11">
+      <p>To scan another menu, simply move your phone to a different food category name.</p>
+    </div>
+
+    <div class="slide">
+      <img src="images/scanlast.jpg" alt="Step 12">
+      <p>To scan another menu, simply move your phone to a different food category name.</p>
+    </div>
+
+    <!-- Navigation buttons -->
+    <div class="nav-buttons">
+      <button id="prevBtn">Previous</button>
+      <button id="nextBtn">Next</button>
+    </div>
   </div>
 </div>
 
 
+<a-scene mindar-image="imageTargetSrc: fulltarget.mind; autoStart: true; filterMinCF: 0.0001; filterBeta: 0.001;"
+         embedded
+         vr-mode-ui="enabled: false"
+         device-orientation-permission-ui="enabled: false"
+         style="width:100vw; height:100vh;">
 
-  <!-- How It Works -->
-<section class="content-section" id="how-it-works" style="padding-top: 40px;">
-  <div class="container">
+         
+  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-<div class="row align-items-center justify-content-center mb-5">
-  <div class="col-md-6 text-center mb-4 mb-md-0">
-    <h3>How To Use</h3>
-    <p style="text-align: justify; font-size: 0.875rem; line-height: 1.4;">
-  1. Choose whether you want to Scan the menu or View the full menu in AR.<br><br>
-  2. Watch as your chosen meal appears before you in 3D.<br><br>
-  3. Explore each dish’s size, ingredients, and plating — before ordering!<br><br>
-  Note: Make sure you have a stable internet connection.
-</p>
-  </div>
+
+  <!-- Marker 0: sizes -->
+<a-entity 
+  id="marker0" mindar-image-target="targetIndex: 0">
+</a-entity>
+
+  <!-- Marker 1: Biryani -->
+ <a-entity 
+  id="marker1" mindar-image-target="targetIndex: 1">
+</a-entity>
+
+   <!-- Marker 2: broasted -->
+  <a-entity 
+  id="marker2" mindar-image-target="targetIndex: 2">
+
+</a-entity>
+
+  <!-- Marker 3: combo i -->
+  <a-entity 
+  id="marker3" mindar-image-target="targetIndex: 3" >
+</a-entity>
+
+  <!-- Marker 4: Desserts -->
+ <a-entity 
+  id="marker4" mindar-image-target="targetIndex: 4" >
+</a-entity>
+
+  <!-- Marker 5: Drinks -->
+ <a-entity 
+  id="marker5" mindar-image-target="targetIndex: 5" >
+</a-entity>
+
+  <!-- Marker 6: Haleem -->
+  <a-entity 
+  id="marker6" mindar-image-target="targetIndex: 6">
+</a-entity>
+
+  <!-- Marker 7: Hummus -->
+  <a-entity 
+  id="marker7" mindar-image-target="targetIndex: 7" >
+</a-entity>
+
+  <!-- Marker 8: Mandi -->
+  <a-entity 
+  id="marker8" mindar-image-target="targetIndex: 8" >
+</a-entity>
+
+  <!-- Marker 9: Mixed -->
+  <a-entity 
+  id="marker9" mindar-image-target="targetIndex: 9">
+</a-entity>
+
+  <!-- Marker 10: Masala -->
+  <a-entity 
+  id="marker10" mindar-image-target="targetIndex: 10">
+</a-entity>
+
+ <!-- Marker 11: Maqloobah -->
+ <a-entity 
+  id="marker11" mindar-image-target="targetIndex: 11" >
   
-</div>
-    <div class="row">
-<!-- Scan Menu Card--> 
-<div class="col-md-6 mb-4">
-  <div id="scanMenuCard" class="card shadow-sm h-100">
-    <div id="scanMenuCarousel" class="carousel slide" data-ride="carousel" style="border-radius: 12px 12px 0 0;">
-      <div class="carousel-inner">
-        <div class="carousel-item active">
-          <img src="images/scann.png" class="d-block w-100" alt="Scan Step 1" style="width: 100%; object-fit: contain; cursor: pointer;" onclick="openHowItWorksModal(this.src)">
+</a-entity>
 
-        </div>
-        <div class="carousel-item">
-          <img src="images/scanbm.png" class="d-block w-100" alt="Scan Step 2" style="width: 100%; object-fit: contain; cursor: pointer;" onclick="openHowItWorksModal(this.src)">
-        </div>
-        <div class="carousel-item">
-          <img src="images/scanmbp.jpg" class="d-block w-100" alt="Scan Step 3" style="width: 100%; object-fit: contain; cursor: pointer;" onclick="openHowItWorksModal(this.src)">
-        </div>
-         <div class="carousel-item">
-          <img src="images/scankm.jpg" class="d-block w-100" alt="Scan Step 4" style="width: 100%; object-fit: contain; cursor: pointer;" onclick="openHowItWorksModal(this.src)">
-        </div>
-         <div class="carousel-item">
-          <img src="images/scankt.jpg" class="d-block w-100" alt="Scan Step 5" style="width: 100%; object-fit: contain; cursor: pointer;" onclick="openHowItWorksModal(this.src)">
-        </div>
-         <div class="carousel-item">
-          <img src="images/scanmasala.jpg" class="d-block w-100" alt="Scan Step 6" style="width: 100%; object-fit: contain; cursor: pointer;" onclick="openHowItWorksModal(this.src)">
-        </div>
-         <div class="carousel-item">
-          <img src="images/scanmbp.jpg" class="d-block w-100" alt="Scan Step 7" style="width: 100%; object-fit: contain; cursor: pointer;" onclick="openHowItWorksModal(this.src)">
-        </div>
-         <div class="carousel-item">
-          <img src="images/scanvegshaw.jpg" class="d-block w-100" alt="Scan Step 8" style="width: 100%; object-fit: contain; cursor: pointer;" onclick="openHowItWorksModal(this.src)">
-        </div>
-        <div class="carousel-item">
-          <img src="images/scanlast.jpg" class="d-block w-100" alt="Scan Step 9" style="width: 100%; object-fit: contain; cursor: pointer;" onclick="openHowItWorksModal(this.src)">
-        </div>
-      </div>
-      <a class="carousel-control-prev" href="#scanMenuCarousel" role="button" data-slide="prev">
-        <span class="carousel-control-prev-icon" style="background-color:black;"></span>
-      </a>
-      <a class="carousel-control-next" href="#scanMenuCarousel" role="button" data-slide="next">
-        <span class="carousel-control-next-icon" style="background-color:black;"></span>
-      </a>
-    </div>
+  <!-- Marker 12: Pastil -->
+<a-entity 
+  id="marker12" mindar-image-target="targetIndex: 12" >
+</a-entity>
 
-    <!-- Card Body -->
-<div class="card-body text-center">
-  <h5 class="card-title" style="font-size: 1rem;">Scan Menu</h5>
-  <p class="card-text" style="font-size: 0.875rem; line-height: 1.4;">
-    After the AR scanner activates, simply point your camera at a food category name to explore its corresponding dish. <br> <br>Each category dynamically loads its 3D model, and when available, allows you to choose different sizes or options. Just move your camera to another category to discover more dishes.
-  </p><br>
-  <a href="menuscan.html" class="btn btn-custom">Start Scanning</a>
-</div>
+  <!-- Marker 13: Pita -->
+ <a-entity 
+  id="marker13" mindar-image-target="targetIndex: 13" >
+</a-entity>
 
-  </div>
-</div>
+  <!-- Marker 14: Shaw rice -->
+  <a-entity 
+  id="marker14" mindar-image-target="targetIndex: 14" >
+</a-entity>
+  
+  <!-- Marker 15: Shawarma -->
+<a-entity 
+  id="marker15" mindar-image-target="targetIndex: 15" >
+</a-entity>
 
-<!-- Modal -->
-<div class="modal fade" id="howItWorksModal" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content" style="background: transparent; border: none;">
-      <div class="modal-body p-0 text-center position-relative" style="overflow: hidden;">
+  <!-- Marker 16: samosa -->
+  <a-entity 
+  id="marker16" mindar-image-target="targetIndex: 16">
+</a-entity>
 
-        <!-- Close Button -->
-        <button type="button"
-                class="close"
-                data-dismiss="modal"
-                aria-label="Close"
-                style="
-                  position: absolute;
-                  top: -18px;
-                  right: 0px;
-                  z-index: 20; /* Ensure it's above the image */
-                  font-size: 2rem;
-                  color: white; /* White stands out better if image is dark */
-                  opacity: 1;
-                  background: rgba(0,0,0,0.3); /* Slight background for visibility */
-                  border: none;
-                  border-radius: 50%;
-                  width: 55px;
-                  height: 55px;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  cursor: pointer;
-                  transition: transform 0.2s ease;
-                "
-                onmouseover="this.style.transform='scale(1.2)'"
-                onmouseout="this.style.transform='scale(1)'">
-          <span aria-hidden="true">&times;</span>
-        </button>
+  <!-- Marker 17: Tikka -->
+  <a-entity 
+  id="marker17" mindar-image-target="targetIndex: 17" >
+</a-entity>
 
-        <!-- Image -->
-        <img id="howItWorksModalImage" 
-             src="" 
-             alt="Full Image" 
-             class="img-fluid" 
-             style="max-width: 100%; max-height: 80vh; border-radius: 12px;">
+  <!-- Marker 18: Veggies -->
+  <a-entity 
+  id="marker18" mindar-image-target="targetIndex: 18" >
+</a-entity>
 
-        <!-- Button Below Image -->
-        <div class="modal-buttons mt-3">
-          <a href="menuscan.html" class="btn btn-custom">Start Scanning</a>
-        </div>
+  <!-- Marker 19: Kabab-->
+  <a-entity 
+  id="marker19" mindar-image-target="targetIndex: 19">
+</a-entity>
 
-      </div>
-    </div>
-  </div>
-</div>
+<!-- Marker20: Kabsah -->
+  <a-entity 
+  id="marker20" mindar-image-target="targetIndex: 20">
+</a-entity>
+
+<!-- Marker21: ADD-ONS -->
+  <a-entity 
+  id="marker21" mindar-image-target="targetIndex: 21">
+</a-entity>
 
 
-      <!-- View Menu in AR Card -->
-      <div class="col-md-6 mb-4">
-        <div id="viewMenuCard" class="card shadow-sm h-100">
-          <div style="height: 250px; overflow: hidden; border-radius: 0;">
-            <video autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover;">
-              <source src="images/vidview.mp4" type="video/mp4">
-              Your browser does not support the video tag.
-            </video>
-          </div>
-          <div class="card-body text-center">
-            <h5 class="card-title" style="font-size: 1rem;">View Menu in AR</h5>
-            <p class="card-text" style="font-size: 0rem; line-height: 1.4;">
-  <ul style="margin-left: 1rem; padding-left: 1rem;">
-    <li>The AR mode provides a menu experience through your device’s camera, blending digital dishes into the real world.</li>
-    <li>Compatible with <strong>ARCore-supported phones</strong> for smooth and accurate augmented reality interactions.</li>
-    <li>Displays a visual marker to help place and view the AR menu. Enables exploration of food categories, dish sizes, and detailed 3D models for preview.</li>
-  </ul>
-  <a href="https://developers.google.com/ar/devices#google_play_devices" target="_blank" style="color: #007bff; text-decoration: underline;">
-    View supported devices
-  </a>
-</p><br>
-           <a href="https://baigsmenu.netlify.app/" class="btn btn-custom">Start Viewing</a>
-          </div>
+ 
 
-        </div>
-      </div>
-    </div>
-
-  </div>
-</section>
+</a-scene>
 
 
+<script type="module">
+const contentDiv = document.getElementById('content');
 
-<!-- What is AR -->
-<section id="about-ar" class="content-section" 
-         style="background-color: #02112c; color: white; padding: 60px 20px 40px 20px;">
-  <div class="container">
-    <div class="row align-items-center">
-      <div class="col-md-7 mb-4 mb-md-0">
-        <div class="d-flex align-items-center mb-3">
-          <img src="images/iconar.png" alt="AR Icon" 
-               style="width: 45px; height: 45px; margin-right: 10px;">
-          <h3 style="margin: 0; color: white;">What is AR?</h3>
-        </div>
+const markerMenu = {
+ 0: { // Sizes
+      categories: {
+        "Budget–Regular": {
+          variants: {
+            Budget: { 
+            description: "Budget size Chicken Biryani - Good for 1 ",
+              path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsA/budget_chick_bryani.glb', 
+              scale: '0.2 0.2 0.2', 
+              position: '0 0 0' 
+            },
+            Solo: { 
+              description: "Solo size Beef Kabab w/ Rice - Good for 1-2pax",
+              path: 'modelsH/solo_broasted.glb', 
+              scale: '0.2 0.2 0.2', 
+              position: '0 0 0' 
+            },
+            Regular: { 
+              description: "Regular size Mandi Chicken - Good for 2-3pax",
+              path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsE/regularmandi.glb', 
+              scale: '0.2 0.2 0.2', 
+              position: '0 0 0' 
+            }, 
+          }
+        },
+        "Medium-Jumbo": {
+          variants: {
+            Medium: { 
+              description: "Medium size Mutton Biryani - good for 3-4pax",
+              path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsD/medium_mtn_bryni.glb', 
+              scale: '0.2 0.2 0.2', 
+              position: '0 0 0' 
+            },
+            Large: { 
+              description: "Large size Kabsah Chicken - good for 4-5pax",
+              path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsC/large_kbsah.glb', 
+                scale: '0.2 0.2 0.2', 
+                position: '0 0 0' 
+              },
+              Jumbo: { 
+                description: "Jumbo sized Mixed Biryani Shrimp&Beef - good for 5-6pax",
+                path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsB/jumbo_mixed.glb', 
+                scale: '0.2 0.2 0.2', 
+                  position: '0 0 0' 
+              },     
+          }
+        },
+        "Bilao Sizes": {
+          variants: {
+            Bilao12: { 
+              description: "Bilao size12' Chicken & Mutton Biryani - good for 6-8pax",
+              path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsA/bilao12_chickmtn.glb', 
+                scale: '0.2 0.2 0.2', 
+                position: '0 0 0' 
+              },
+            Bilao14: { 
+              description: "Bilao size 14inch Chicken & Beef Kabsah - good for 8-11pax",
+              path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsA/bilao14_chickbeefkabsah.glb', 
+                scale: '0.2 0.2 0.2', 
+                position: '0 0 0' 
+              },
+          }
+        }
+      }
+    },
 
-        <p style="text-align: justify; font-size: 0.95rem; line-height: 1.7;">
-          <strong>Augmented Reality (AR)</strong> is a technology that overlays digital 3D elements onto the real world through your device’s camera. 
-          It blends virtual and real environments, allowing you to interact with digital content in a more immersive way.  
-          <br><br>
-          <strong>WebAR</strong> takes this a step further by bringing AR experiences directly through a web browser, no app download needed.   
-        </p>
-        <div class="text-center d-md-none my-4">
-          <img src="images/editsam.png" 
-               alt="AR Dining Experience" 
-               class="img-fluid"
-               style="max-width: 80%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.4);">
-        </div>
+  1: { // Biryani
+  variants: {
+    Chicken: { 
+      description: "Our Chicken Biryani is made with tender chicken pieces, basmati rice, and spices. \n\nContains: raisins, spices, egg",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsE/smallchbiryani-v1.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' ,
+       nutrition: {
+    "Calories (kcal)": 461,
+    "Protein (g)": 21,
+    "Total Fat (g)": 17,
+    "Saturated Fat (g)": 4,
+    "Carbohydrates (g)": 57,
+    "Fiber (g)": 2,
+    "Sugars (g)": 4,
+    "Cholesterol (mg)": 55,
+    "Sodium (mg)": 650
+  }
+    },
+    Beef: { 
+      description: "Our Beef Biryani features soft beef cubes simmered with herbs and basmati rice. \n\nContains: raisins, spices, egg",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsG/smbeefbryani-v1.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    Mutton: { 
+      description: "Our Mutton Biryani combines juicy mutton cuts and basmati rice cooked in authentic spices.\n\nContains: raisins, spices, egg",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsG/smmtnbryani-v2.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    Shrimp: { 
+      description: "Our Shrimp Biryani is a seafood delight with basmati rice infused with mild spices and shrimp.\n\nContains: raisins, spices, egg",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsE/smshrimpbryani-v3.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+  }
+},
+  
+  
+  2: { // Broasted
+    description: "an Arab-style method of cooking chicken usually in  deep frying and it is seasoned with spices.\n\nIncludes: Khubz, hummus, fries, salatah",
+    default: { path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsA/broasted-v1.glb', scale: '0.2 0.2 0.2', position: '0 0 0' },
+  }, 
+  3:{ // COMBO I
+    description: "Biryani Chicken with 1pc beef kabab and choose of 1 drink.",
+    default: { path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsB/comboscan.glb', scale: '0.2 0.2 0.2', position: '0 0 0' },
+  },
+   4:{ // Desserts
+    description: "A dessert that is soft and round made from milk solids , deep-fried and then soaked in a sugar syrup. It is known for it’s texture and rich sweetness",
+    default: { path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsB/gulab.glb', scale: '0.2 0.2 0.2', position: '0 0 0' },
+  },
+  5:{ // Drinks
+    description: "Choose a drink category.",
+    variants: {
+      "Canned Soda": { 
+      description: "provide the perfect balance to bold, spicy flavors",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsH/sodas.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+      "Shakes": { 
+      description: "soothe the heat of spicy flavors while adding a rich, sweet finish to your meal.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsE/shakes.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+      "Lemonade": { 
+      description: "Made from freshly squeezed lemon and cucumber.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsC/lemonade.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    "Lassi": { 
+      description: "A traditional Yogurt-based drink from the Indian subcontinent. it is known for its  creamy texture.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsC/lassi.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    "Chai": { 
+      description: "It is made by brewing black tea or with milk and aromatic spices",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsA/chai2.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
 
-        <p style="text-align: justify; font-size: 0.95rem; line-height: 1.7;">
-          Bringing AR into dining introduces a whole new kind of experience in the food industry. 
-          It lets diners see their dishes come to life in 3D before ordering. 
-          This is especially helpful for foods that are uncommon or unfamiliar, 
-          giving customers a clearer idea of what to expect.
-        </p>
-      </div>
-      <div class="col-md-5 text-center d-none d-md-block">
-        <img src="images/editsam.png" 
-             alt="AR Dining Experience" 
-             class="img-fluid"
-             style="max-width: 90%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.4);">
-      </div>
-
-    </div>
-  </div>
-</section>
-
- <!-- About Us -->
-<section id="about-us" class="content-section" 
-         style="background-color: #f8f4ec; padding: 60px 20px; border-radius: 12px;">
-  <div class="container">
-    <div class="row align-items-center">
-
-      <div class="col-md-7 mb-4 mb-md-0">
-        <h3>About Baig’s Restaurant</h3>
-        <p style="text-align: justify; font-size: 0.95rem; line-height: 1.6;">
-          Established in <strong>September 2020</strong>, <strong>Baig’s Restaurant</strong> proudly serves authentic 
-          <strong>Arab-Pakistani-Indian cuisine</strong> that brings together bold spices and traditional flavors.  
-          Whether you choose to dine in, order out, or explore our interactive AR menu, 
-          we promise a flavorful journey that satisfies both your taste buds and curiosity.   
-        </p>
-      </div>
-
-      <div class="col-md-5 text-center">
-        <img src="images/resto4.jpg" 
-             alt="Baig’s Restaurant Interior" 
-             class="img-fluid" 
-             style="max-width: 90%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-      </div>
-
-    </div>
-  </div>
-</section>
-
-
-  <!-- Footer -->
-  <footer id="contact">
-  <div style="text-align: center; margin-top: 20px;">
-  <!-- Google Maps Icon -->
-  <a href="https://maps.app.goo.gl/MEYH49GFCsDqdchV6" target="_blank" style="margin: 0 10px;">
-    <img src="images/gmaps.png" alt="Google Maps" 
-         style="width: 70px; height: 40px; vertical-align: middle;">
-  </a>
-  <!-- Facebook Icon -->
-  <a href="https://www.facebook.com/BaigsArabPakistanIndianCuisine" target="_blank" style="margin: 0 10px;">
-    <img src="images/fb.png" alt="Facebook" 
-         style="width: 40px; height: 40px; vertical-align: middle;">
-  </a>
-</div>
-<br>
-    <p>Address: B3A L3788 Brgy. Sta.Lucia Dasmariñas City Cavite <br> Phone: +63 945 597 0707</p>
-    <p>&copy; 2025 Baig's Restaurant. All rights reserved.</p>
-  </footer>
-
-  <!-- Bootstrap JS -->
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-
- <script>
-  // Header scroll behavior
-  window.onscroll = function() {
-    var header = document.querySelector("header");
-    if (window.pageYOffset > 50) {
-      header.classList.add("shrink");
-    } else {
-      header.classList.remove("shrink");
     }
+  },
+  6:{ // Haleem
+    description: "A stew made from Lentils or daal, and can also be mixed with tender meat  simmered with aromatic spices",
+    default: { path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsB/haleem.glb', scale: '0.2 0.2 0.2', position: '0 0 0' },
+  },
+  7: { // Hummus
+    description: " Made from blended Chickpeas. Best partner for Khubz. Originated in the Middle East. \n\nContains: Tahini/Sesame",
+    default: { path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsB/hummus.glb', scale: '0.2 0.2 0.2', position: '0 0 0' },
+  },
+  8: { // Mandi
+  variants: {
+    Chicken: { 
+      description: "Chicken Mandi is oven-roasted featuring tender chicken tomato-based layered over biryani rice.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsG/smallchmandi-v2.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    Beef: { 
+      description: "Our Beef Mandi simmered in a rich tomato-based blend roasted in the oven, paired with biryani rice.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsE/smallbeefmandi-v5.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    Mutton: { 
+      description: "Our Mutton Mandi features mutton pieces baked with tomato-spiced oven-roasted with biryani rice.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsG/smallmtnmandi-v3.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    Shrimp: { 
+      description: "Our Shrimp Mandi is a seafood twist, combining shrimp with tomato-based blend, lightly oven-roasted with biryani rice",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsG/smallshrimpmandi-v4.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+  }
+},
+9:  { // Mixed
+   variants: { 
+    "Mixed Biryani": {
+      description: "Mixed Chicken and Shrimp cooked together with basmati rice and spices",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsD/mixedbiryani-v1.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    "Mixed Kabsah": {
+      description: "mixed chiken and beef topped on basmati rice , marinated with spices.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsD/mixedkabsah-v2.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+    "Mixed Mandi": {
+      model: { path: 'modelsD/mixedmandi-v3.glb', scale: '0.2 0.2 0.2', position: '0 0 0' },
+      description: "mixed chicken and mutton with blend of tomato and biryani rice",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsD/mixedmandi-v3.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+  }
+},
+10: { // Masala Menu
+   variants: { 
+    "Masala": {
+      description: "Cooked with a blend of spices, onions, tomatoes, and herbs. Originated from India/Pakistan",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsD/masala.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+    "Curry": {
+      description: " A savory dish  simmered in a spiced sauce. Adapted worldwide",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsB/cutty.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+    "Nihari": {
+      model: { path: 'models/nihari.glb', scale: '0.2 0.2 0.2', position: '0 0 0' },
+      description: "Stew of tender meat in a spiced gravy with ginger and calamansi",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsD/nihari.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+    "Korma": {
+      description: "An Indian creamy dish cooked with yogurt  and mild spices",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsB/korma.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    }
+  }
+},
+11: { // Maqloobah
+  variants: {
+    Chicken: { 
+      description: "Our Chicken Maqloobah is a traditional layered rice dish made with chicken, basmati rice, and vegetables all flipped upside down.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsC/maqloobahch-v4.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    Beef: { 
+      description: "Our Beef Maqloobah features tender beef layered with rice and vegetables cooked together then flipped for a hearty meal.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsC/maqloobahbeef-v5.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    Mutton: { 
+      description: "Our Mutton Maqloobah combines mutton with rice and layers of vegetables inverted after cooking.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsC/maqloobahmtn-v6.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    Shrimp: { 
+      description: "Our Shrimp Maqloobah is a seafood twist made with shrimp, seasoned rice, and layered vegetables flipped upside down.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsC/maqloobahshrimp-v7.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+   
+  }
+},
+12: { // Pastil
+    description: "A traditional dish from Mindanao in the Philippines.It consists of steamed rice topped with shredded chicken or beef.",
+    default: { path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsE/pater.glb', scale: '0.2 0.2 0.2', position: '0 0 0' },
+  },
+13:{ // Pita
+  variants: {
+    "Chappati": {
+      description: "also known as roti made with wheat flour and can be enjoyed with various dishes",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsB/chappati.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    "Paratha": {
+      description: " is a flatbread native to the Indian subcontinent. It can also be layared with cheese, butter, sugar, garlic, egg.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsD/paratha.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    "Khubz": {
+      description: "a white and round pita and can be enjoyed with various dishes.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsB/khubs.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+  }
+},
+14:  { // Shawarma Rice
+  variants: {
+    "Beef": {
+      description: "A Filipino take on the Middle Eastern classic, featuring  shawarma-style meat  served over a yellow spiced rice and salatah.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsF/shawricebeef-v2.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    "Chicken": {
+      description: "A Filipino take on the Middle Eastern classic, featuring  shawarma-style meat  served over a yellow spiced rice and salatah.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsF/shawricechik-v1.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+  }
+},
+15:  { // Shawarma
+  variants: {
+    "with Veggies": {
+      description: " A Middle Eastern delicacy made by marinated meat on a vertical strip. It is wrapped in flatbread with vegetables inside. \n\nIncludes: Onions, Tomatoes, Cabbage, Cucumber",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsF/shawarmaveg-v10.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+    "with Fries": {
+      description: "  A Middle Eastern delicacy made by marinated meat on a vertical strip. It is wrapped in flatbread with fries inside",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsE/shawarmafries-v11.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+  }
+},
+16:{ // Samosa
+    description: "Known for it’s triangular shape. A fried snack filled with spiced Potatoes and Green peas and can also include minced meat and cheese.",
+    default: { path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsF/samosa2.glb', scale: '0.2 0.2 0.2', position: '0 0 0' },
+  },
+
+
+
+17:{ // Tikkah
+  variants: {
+    "with Khubz": {
+      description: "consists of marinated pieces of meat that are roasted & grilled, includes blend of spices served wiht pita.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsH/tikkakhubz-v1.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+    "with Rice": {
+      description: "consists of marinated pieces of meat that are roasted & grilled served with biryani rice.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsH/tikkarice-v2.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+  }
+},
+18:   { // Veggies
+  variants: {
+    "Bhindi": {
+      description: "Okra Masala, made with okra, spices, and herbs, partnered with khubz.",
+      path:'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsA/bhindi.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+    "Loki Kaddo": {
+      description: "Upo Masala , blend of bottle gourd in spiced masala, partnered with khubz.",
+      path:'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsC/lokikaddo.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+    "Karela": {
+      description: "Ampalaya Masala , a dish of bitter gourd in spiced masala, partnered with khubz.",
+      path:'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsB/karela.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+    "Mixed Veggies": {
+      description: "mix of fresh vegetables cooked in a spiced masala, partnered with khubz.",
+      path:'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsD/mixedmasala.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },"Vegetable Biryani": {
+      description: "basmati rice layered with mixed vegetables, herbs, and spices.",
+      path:'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsH/vegbiryani.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    }
+  }
+},
+19: { // Kabab
+  variants: {
+    "with Khubz": {
+      description: "Consisting of skewered or minced meat  seasoned with spices and herbs, then grilled or roasted and served with khubz(pita).",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsB/kababkhubz-v11.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+    "with Rice": {
+      description: "Consisting of skewered or minced meat  seasoned with spices and herbs, then grilled and served with biryani rice.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsB/kababrice-v12.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0'
+    },
+  }
+},
+ 20: { // Kabsah
+  variants: {
+    Chicken: { 
+      description: "Our Chicken Kabsah features grilled, fried or roasted chicken served over basmati rice cooked with Arabic seasonings.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsG/smallkabsah-v5.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    Beef: { 
+      description: "Our Beef Kabsah offers tender beef pieces paired with basmati rice, fries and Middle Eastern spices.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsG/smbeefkabsa-v6.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    Mutton: { 
+      description: "Our Mutton Kabsah features roasted or grilled mutton layered over basmati rice cooked with authentic Kabsah spices.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsG/smmtnkabsa-v7.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    Shrimp: { 
+      description: "Our Shrimp Kabsah is a seafood version, made with lightly roasted shrimp with basmati rice.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsH/smshrimpkabsa-v8.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+  }
+},
+21: { // Add-ons
+  variants: {
+    "Biryani Rice": {
+      description: "long-grain Basmati rice with flavors of saffron, spices, and herbs",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsA/biryanirice.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    "Raita": {
+      description: "A yogurt sauce combined with fresh vegetables.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsD/raita.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+    "Palapa": {
+      description: " Filipino condiment made primarily from sakurab, ginger, turmeric, chili, toasted coconut. Originated from Maranao tribe.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsD/palapa.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+     "Salatah": {
+      description: "A salad originating from the Middle East, commonly served as a side dish which typically includes fresh vegetables.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsE/salatah.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+     "Sauces": {
+      description: "White/Garlic sauce is condiment that is  often served as a dip. Red/Hot sauce is a spicy condiment made from a blend of chili and tomatoes.",
+      path: 'https://cdn.jsdelivr.net/gh/zohra07810/WebArmenu@main/modelsE/sauces.glb', 
+      scale: '0.2 0.2 0.2', 
+      position: '0 0 0' 
+    },
+  }
+}
+ 
+};
+let currentMarker = null;
+let currentModel = null;
+let activeVariant = null;
+const firstModelLoadedMap = new Map();
+const preloadedModels = {}; // store loaded models per marker + variant key
+
+
+function loadModel(markerEntity, modelData = null, variants = {}, variantName = null) {
+  // Clear previous model & content
+  if (currentModel) {
+    currentModel.object3D.visible = false;
+    currentModel = null;
+  }
+  contentDiv.innerHTML = '';
+
+  // If no modelData but there are variants, show variant buttons
+  if (!modelData && Object.keys(variants).length > 0) {
+    const title = document.createElement('h3');
+    title.textContent = 'Select Category:';
+    contentDiv.appendChild(title);
+
+    Object.keys(variants).forEach((name) => {
+      const btn = document.createElement('button');
+      btn.textContent = name;
+      btn.onclick = () => loadModel(markerEntity, variants[name], variants, name);
+      contentDiv.appendChild(btn);
+    });
+    return;
+  }
+// If modelData itself has description (single model without 'default')
+if (modelData && modelData.description) {
+
+  const descContainer = document.createElement('div');
+  descContainer.id = 'description-container';
+
+  const desc = document.createElement('p');
+  desc.id = 'description';
+  desc.textContent = modelData.description;
+
+  descContainer.appendChild(desc);
+  contentDiv.appendChild(descContainer);
+
+
+  // ---- BUTTON ROW (Back + Nutrition) ----
+  const btnRow = document.createElement('div');
+  btnRow.style.display = "flex";
+  btnRow.style.justifyContent = "center";
+  btnRow.style.gap = "10px";
+  btnRow.style.marginTop = "15px";
+
+  // Back Button
+  const backBtn = document.createElement('button');
+  backBtn.textContent = "← Back";
+  backBtn.onclick = () => {
+    const menu = markerMenu[currentMarker.dataset.index];
+    if (menu.variants) showMainVariants(markerEntity);
   };
 
-  // Hamburger toggle
-  const hamburger = document.getElementById('hamburger');
-  const headerButtons = document.getElementById('headerButtons');
-  const headerLinks = document.querySelectorAll('.header-link'); // add this
+  // Nutrition Button
+  const nutritionBtn = document.createElement('button');
+  nutritionBtn.textContent = "📊 Nutrition";
+  nutritionBtn.onclick = () => {
+    const box = document.getElementById('nutrition-container');
+    box.style.display = box.style.display === "none" ? "block" : "none";
+  };
 
-  hamburger.addEventListener('click', () => {
-    headerButtons.classList.toggle('show');
-  });
-
-  // Close the menu when any link is clicked
-  headerLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      headerButtons.classList.remove('show');
-    });
-  });
-</script>
-
-<script>
-function openHowItWorksModal(src) {
-  document.getElementById('howItWorksModalImage').src = src;
-  $('#howItWorksModal').modal('show');
+  btnRow.appendChild(backBtn);
+  btnRow.appendChild(nutritionBtn);
+  contentDiv.appendChild(btnRow);
 }
-</script>
 
-<!-- Script to open modal with clicked image -->
-<script>
-  function openImageModal(src) {
-    document.getElementById('modalImage').src = src;
-    $('#imageModal').modal('show');
+
+  // --- Loader / 3D model loading ---
+  const markerKey = markerEntity.dataset.id || markerEntity;
+  const modelKey = `${markerKey}_${variantName || ''}`;
+
+  const loader = new THREE.GLTFLoader();
+  if (THREE.DRACOLoader) {
+    const draco = new THREE.DRACOLoader();
+    draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+    loader.setDRACOLoader(draco);
   }
-</script>
 
-<script>
-  const swiper = new Swiper(".mySwiper", {
-    effect: "coverflow",
-    grabCursor: true,
-    centeredSlides: true,
-    slidesPerView: "auto",
-    loop: true,
-    coverflowEffect: {
-      rotate: 30,
-      stretch: 0,
-      depth: 150,
-      modifier: 1,
-      slideShadows: true,
-    },
-    pagination: {
-      el: ".swiper-pagination",
-      clickable: true,
-    },
-    navigation: {
-      nextEl: ".swiper-button-next",
-      prevEl: ".swiper-button-prev",
-    },
-    
-    breakpoints: {
-      992: { // Desktop
-        slidesPerView: 3,
-        spaceBetween: 30,
-        coverflowEffect: {
-          rotate: 0,     
-          stretch: 0,
-          depth: 0,     
-          modifier: 1,
-          slideShadows: false
+  if (preloadedModels[modelKey]) {
+    Object.keys(preloadedModels).forEach((key) => {
+      if (key.startsWith(markerKey)) preloadedModels[key].object3D.visible = false;
+    });
+
+    preloadedModels[modelKey].object3D.visible = true;
+    currentModel = preloadedModels[modelKey];
+    contentDiv.innerHTML = '';
+    showModelDescription(modelData, variants, markerEntity);
+    window.addChangeViewButton(currentModel);
+
+  } else {
+
+    // ---- NEW CIRCULAR LOADER ----
+    const loaderWrapper = document.createElement("div");
+    loaderWrapper.style.cssText = `
+      width: 90px;
+      height: 90px;
+      margin: 15px auto;
+      position: relative;
+    `;
+
+    const baseCircle = document.createElement("div");
+    baseCircle.style.cssText = `
+      width: 100%;
+      height: 100%;
+      border: 6px solid #ccc;
+      border-radius: 50%;
+      box-sizing: border-box;
+      position: absolute;
+    `;
+
+    const progressCircle = document.createElement("div");
+    progressCircle.style.cssText = `
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      position: absolute;
+      background: conic-gradient(#4caf50 0deg, transparent 0deg);
+      transition: background 0.12s linear;
+    `;
+
+    const percentText = document.createElement("div");
+    percentText.style.cssText = `
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+      text-align: center;
+    `;
+    percentText.textContent = "0%";
+
+    loaderWrapper.appendChild(baseCircle);
+    loaderWrapper.appendChild(progressCircle);
+    loaderWrapper.appendChild(percentText);
+
+    contentDiv.textContent = "Loading Model...";
+    contentDiv.appendChild(loaderWrapper);
+
+    const entity = document.createElement('a-entity');
+    entity.setAttribute('scale', modelData.scale || '0.2 0.2 0.2');
+    entity.setAttribute('position', modelData.position || '0 0 0');
+    markerEntity.appendChild(entity);
+
+    loader.load(
+      modelData.path,
+      (gltf) => {
+        entity.setObject3D('mesh', gltf.scene);
+        preloadedModels[modelKey] = entity;
+        currentModel = entity;
+
+        percentText.textContent = "100%";
+        progressCircle.style.background = `conic-gradient(#4caf50 360deg, transparent 360deg)`;
+
+        setTimeout(() => {
+          loaderWrapper.remove();
+          contentDiv.innerHTML = '';
+          showModelDescription(modelData, variants, markerEntity);
+          window.addChangeViewButton(currentModel);
+        }, 400);
+      },
+      (xhr) => {
+        if (xhr.lengthComputable) {
+          let percent = Math.min((xhr.loaded / xhr.total) * 100, 100);
+          percentText.textContent = Math.round(percent) + "%";
+          progressCircle.style.background =
+            `conic-gradient(#4caf50 ${(percent / 100) * 360}deg, transparent ${(percent / 100) * 360}deg)`;
         }
       },
-      768: { // Tablet
-        slidesPerView: 2,
-        spaceBetween: 20,
-        coverflowEffect: {
-          rotate: 30,
-          depth: 100
+      (error) => {
+        console.error('Error loading model', error);
+        contentDiv.innerHTML = '❌ Failed to load 3D model';
+      }
+    );
+  }
+
+  // --- Preload other variants ---
+  if (!firstModelLoadedMap.get(markerKey)) {
+    firstModelLoadedMap.set(markerKey, true);
+
+    const modelsToPreload = [];
+    if (modelData.sizes) {
+      Object.keys(modelData.sizes).forEach((size) => {
+        const key = `${markerKey}_${size}`;
+        if (!preloadedModels[key]) {
+          modelsToPreload.push({ key, data: modelData.sizes[size] });
+        }
+      });
+    } else if (Object.keys(variants).length > 0) {
+      Object.keys(variants).forEach((vName) => {
+        const key = `${markerKey}_${vName}`;
+        if (vName !== variantName && !preloadedModels[key]) {
+          modelsToPreload.push({ key, data: variants[vName] });
+        }
+      });
+    }
+
+    modelsToPreload.forEach(({ key, data }) => {
+      const entity = document.createElement('a-entity');
+      entity.setAttribute('scale', data.scale || '0.2 0.2 0.2');
+      entity.setAttribute('position', data.position || '0 0 0');
+      entity.object3D.visible = false;
+      markerEntity.appendChild(entity);
+
+      loader.load(
+        data.path,
+        (gltf) => {
+          entity.setObject3D('mesh', gltf.scene);
+          preloadedModels[key] = entity;
+        },
+        undefined,
+        (error) => console.warn(`Background model ${key} failed to load`, error)
+      );
+    });
+  }
+}
+
+
+
+// Global function to add Change View button
+window.addChangeViewButton = function(model) {
+  if (!model) return;
+
+  const container = document.getElementById('change-view-container');
+  if (!container) return;
+  container.innerHTML = ''; // clear previous button
+
+  const viewBtn = document.createElement('button');
+  viewBtn.id = 'change-view-btn';
+  viewBtn.textContent = 'Change View';
+
+  // Style
+  viewBtn.style.position = 'relative';
+  viewBtn.style.padding = '8px 12px';
+  viewBtn.style.fontSize = '16px';
+  viewBtn.style.backgroundColor = '#FFD700';
+  viewBtn.style.color = '#000';
+  viewBtn.style.border = 'none';
+  viewBtn.style.borderRadius = '5px';
+  viewBtn.style.cursor = 'pointer';
+  viewBtn.style.zIndex = '9999';
+  viewBtn.style.pointerEvents = 'auto';
+
+  const originalPos = model.getAttribute('position') || { x: 0, y: 0, z: 0 };
+
+  // Detect marker index via MindAR
+  const targetIndex = model.parentElement.components['mindar-image-target']?.data.targetIndex;
+
+  // Define movements based on marker
+  let views;
+  if (targetIndex === 5) {
+    // Custom movements for marker5
+    views = [
+      { rotation: { x: 0, y: 0, z: 90 }, position: { x: originalPos.x, y: originalPos.y, z: originalPos.z } },
+      { rotation: { x: 0, y:0, z: 0 }, position: { x: originalPos.x, y: originalPos.y , z: originalPos.z } },
+    ];
+  } else {
+    // Default movements for all other markers
+    views = [
+      { rotation: { x: 0, y: 0, z: 0 }, position: { x: originalPos.x, y: originalPos.y, z: originalPos.z } },
+      { rotation: { x: -80, y: 0, z: 0 }, position: { x: originalPos.x, y: originalPos.y + 1, z: originalPos.z } },
+      { rotation: { x: -50, y: 0, z: 0 }, position: { x: originalPos.x, y: originalPos.y + 1, z: originalPos.z } },
+      { rotation: { x: 0, y: 0, z: 90 }, position: { x: originalPos.x, y: originalPos.y + 1, z: originalPos.z } },
+      { rotation: { x: 0, y: 0, z: 180 }, position: { x: originalPos.x, y: originalPos.y + 1, z: originalPos.z } },
+    ];
+  }
+
+  let currentViewIndex = 0;
+  viewBtn.onclick = () => {
+    currentViewIndex = (currentViewIndex + 1) % views.length;
+    const view = views[currentViewIndex];
+    model.setAttribute('rotation', view.rotation);
+    model.setAttribute('position', view.position);
+  };
+
+  container.appendChild(viewBtn);
+};
+
+function showModelDescription(modelData, variants, markerEntity) {
+  // Remove old description container if exists
+  const oldContainer = contentDiv.querySelector('#description-container');
+  if (oldContainer) oldContainer.remove();
+
+  // Remove old chart if exists
+  const oldChart = document.getElementById('nutrition-chart-container');
+  if (oldChart) oldChart.remove();
+
+  // Reset width class
+  contentDiv.classList.remove('expanded');
+
+  // Show description if exists
+  if (modelData.description) {
+    const descContainer = document.createElement('div');
+    descContainer.id = 'description-container';
+
+    const desc = document.createElement('p');
+    desc.id = 'description';
+    desc.style.whiteSpace = "pre-line"; // enables \n formatting
+    desc.textContent = modelData.description;
+
+    descContainer.appendChild(desc);
+    contentDiv.appendChild(descContainer);
+
+    // Expand container to fit description
+    contentDiv.classList.add('expanded');
+  }
+
+  // Only add back button if there are variants or it's NOT a default-only model
+  if ((variants && Object.keys(variants).length > 0) || !modelData.default) {
+
+    // Button row container (side by side)
+    const buttonRow = document.createElement('div');
+    buttonRow.style.display = "flex";
+    buttonRow.style.justifyContent = "center";
+    buttonRow.style.gap = "10px";
+    buttonRow.style.marginTop = "15px";
+
+    // Back button
+    const backBtn = document.createElement('button');
+    backBtn.textContent = '← Back';
+    // Small styling
+    backBtn.style.fontSize = "12px";
+    backBtn.style.padding = "6px 10px";
+    backBtn.style.borderRadius = "4px";
+    backBtn.onclick = () => {
+      // Remove chart when going back
+      const chart = document.getElementById('nutrition-chart-container');
+      if (chart) chart.remove();
+
+      const menu = markerMenu[currentMarker.dataset.index];
+      if (menu.variants) showMainVariants(markerEntity);
+      else if (modelData.default) loadModel(markerEntity, modelData.default);
+    };
+    buttonRow.appendChild(backBtn);
+
+    // Nutrition button (toggle)
+    if (modelData.nutrition) {
+      const nutritionBtn = document.createElement('button');
+      nutritionBtn.textContent = "Nutritional Info";
+      // Small styling
+      nutritionBtn.style.fontSize = "12px";
+      nutritionBtn.style.padding = "6px 10px";
+      nutritionBtn.style.borderRadius = "4px";
+
+      let chartVisible = false; // toggle state
+      nutritionBtn.onclick = () => {
+        chartVisible = !chartVisible;
+        const chartContainer = document.getElementById('nutrition-chart-container');
+        if (chartVisible) {
+          showNutritionChart(modelData.nutrition);
+        } else {
+          if (chartContainer) chartContainer.remove();
+        }
+      };
+      buttonRow.appendChild(nutritionBtn);
+    }
+
+    contentDiv.appendChild(buttonRow);
+  }
+}
+
+
+function showNutritionChart(nutritionData) {
+  // Remove previous chart
+  const oldChart = document.getElementById('nutrition-chart-container');
+  if (oldChart) oldChart.remove();
+
+  const chartContainer = document.createElement('div');
+  chartContainer.id = 'nutrition-chart-container';
+  chartContainer.style.width = "280px";
+  chartContainer.style.margin = "10px auto";
+
+  const canvas = document.createElement('canvas');
+  canvas.id = "nutrition-chart";
+  chartContainer.appendChild(canvas);
+
+  contentDiv.appendChild(chartContainer);
+
+  const ctx = canvas.getContext('2d');
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(nutritionData),
+      datasets: [{
+        label: 'Per Serving',
+        data: Object.values(nutritionData),
+        backgroundColor: 'rgba(255,255,255,0.3)',
+        borderColor: '#fff',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      responsive: true,
+      plugins: {
+        legend: {
+          display: false,
+          labels: { color: "#fff" }
+        },
+        title: {
+          display: true,
+          text: "Nutrition Facts",
+          color: "#fff"
+        },
+        tooltip: {
+          titleColor: "#fff",
+          bodyColor: "#fff",
+          backgroundColor: "rgba(0,0,0,0.7)",
+          borderColor: "#fff",
+          borderWidth: 1
         }
       },
-      0: { // Mobile
-        slidesPerView: 1,
-        spaceBetween: 10,
-        coverflowEffect: {
-          rotate: 30,
-          depth: 150
-        }
+      scales: {
+        x: { ticks: { color: "#fff" }, grid: { color: "rgba(255,255,255,0.2)" } },
+        y: { ticks: { color: "#fff" }, grid: { color: "rgba(255,255,255,0.2)" } }
       }
     }
   });
-</script>
+}
 
+// ----------------------------
+// Show main variants
+// ----------------------------
+function showMainVariants(markerEntity) {
+  contentDiv.innerHTML = '';
+  const mainVariants = markerMenu[currentMarker.dataset.index].variants;
 
-<script>
-  const modal = document.getElementById("imageModal");
-  const modalImg = document.getElementById("modalImg");
-  const closeBtn = document.getElementsByClassName("close")[0];
+  const title = document.createElement('h3');
+  title.textContent = 'Select Category:';
+  contentDiv.appendChild(title);
 
-  const swiperImages = document.querySelectorAll(".swiper-slide img");
-
-  swiperImages.forEach(img => {
-    img.style.cursor = "pointer";
-    img.addEventListener("click", () => {
-      modal.style.display = "block";
-      modalImg.src = img.src;
-    });
+  Object.keys(mainVariants).forEach(name => {
+    const btn = document.createElement('button');
+    btn.textContent = name;
+    btn.onclick = () => loadModel(markerEntity, mainVariants[name], mainVariants, name);
+    contentDiv.appendChild(btn);
   });
+}
 
-  // Close modal (X button)
-  closeBtn.onclick = function() {
-    modal.style.display = "none";
-  }
 
-  // Close modal if clicking outside the image
-  modal.onclick = function(e) {
-    if (e.target == modal) {
-      modal.style.display = "none";
+
+
+function disableScroll() {
+  document.body.style.overflow = 'hidden';
+  document.addEventListener('touchmove', preventDefault, { passive: false });
+  document.addEventListener('wheel', preventDefault, { passive: false });
+}
+
+function enableScroll() {
+  document.body.style.overflow = '';
+  document.removeEventListener('touchmove', preventDefault, { passive: false });
+  document.removeEventListener('wheel', preventDefault, { passive: false });
+}
+
+function preventDefault(e) {
+  e.preventDefault();
+}
+
+disableScroll();
+
+
+
+function showDescription(text) {
+  const descDiv = document.getElementById('description');
+  if(descDiv) descDiv.textContent = text;
+}
+
+function clearActiveButtons() {
+  document.querySelectorAll('#content button').forEach(b => b.classList.remove('active'));
+}
+
+document.querySelectorAll('[mindar-image-target]').forEach((marker, index) => {
+  marker.dataset.index = index;
+
+
+marker.addEventListener('targetFound', async () => {
+  currentMarker = marker;
+  const menu = markerMenu[index];
+  if (!menu) return;
+
+  contentDiv.innerHTML = ''; // Clear previous content
+
+  // Special logic for marker 0 (Sizes) if needed
+  if (index === 0) {
+    try {
+      const module = await import('./sizes.js');
+      module.loadSizesMarker(marker, contentDiv, markerMenu);
+    } catch (err) {
+      console.error('Failed to load sizes module:', err);
     }
+    return;
   }
 
-  //  Close modal automatically when clicking any modal button
-  const modalButtons = document.querySelectorAll("#imageModal .modal-buttons a");
-  modalButtons.forEach(button => {
-    button.addEventListener("click", () => {
-      modal.style.display = "none";
+  // Marker has variants
+  if (menu.variants && Object.keys(menu.variants).length > 0) {
+    loadModel(marker, null, menu.variants);
+    return;
+  }
+
+  // Marker is a default-only dish
+  if (menu.default) {
+    try {
+      const defaultModule = await import('./default.js');
+      // Call the function from defaultMarkers.js
+      defaultModule.loadDefaultMarker(marker, contentDiv, menu);
+    } catch (err) {
+      console.error('Failed to load default markers module:', err);
+    }
+    return;
+  }
+});
+
+// ===== TARGET LOST =====
+marker.addEventListener('targetLost', () => {
+  const markerKey = currentMarker?.dataset.id || marker;
+
+  // --- Remove current model completely ---
+  if (currentModel) {
+    if (currentModel.parentElement) currentModel.parentElement.removeChild(currentModel);
+    delete preloadedModels[currentModel.dataset.key];
+    currentModel = null;
+  }
+
+  // --- Remove all other preloaded models for this marker ---
+  Object.keys(preloadedModels).forEach((key) => {
+    if (key.startsWith(markerKey)) {
+      const entity = preloadedModels[key];
+      if (entity.parentElement) entity.parentElement.removeChild(entity);
+      delete preloadedModels[key];
+    }
+  });
+
+  // --- Reset flags & content ---
+  firstModelLoadedMap.delete(markerKey);
+  contentDiv.innerHTML = 'Scan the Menu';
+});
+
+
+});
+
+// Help Modal Slideshow Logic
+const modal = document.getElementById('helpModal');
+const helpBtn = document.getElementById('helpBtn');
+const closeModal = document.querySelector('.close');
+const slides = document.querySelectorAll('.slide');
+const nextBtn = document.getElementById('nextBtn');
+const prevBtn = document.getElementById('prevBtn');
+let currentSlide = 0;
+
+helpBtn.addEventListener('click', () => {
+  modal.style.display = 'block';
+  showSlide(currentSlide);
+});
+
+closeModal.addEventListener('click', () => {
+  modal.style.display = 'none';
+});
+
+window.addEventListener('click', (event) => {
+  if (event.target === modal) {
+    modal.style.display = 'none';
+  }
+});
+
+nextBtn.addEventListener('click', () => {
+  currentSlide = (currentSlide + 1) % slides.length;
+  showSlide(currentSlide);
+});
+
+prevBtn.addEventListener('click', () => {
+  currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+  showSlide(currentSlide);
+});
+
+function showSlide(index) {
+  slides.forEach((slide, i) => {
+    slide.classList.toggle('active', i === index);
+  });
+}
+
+// ✅ Hide the initial modal only on desktop
+window.addEventListener('load', () => {
+  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+  const helpModal = document.getElementById('helpModal');
+
+  if (!isMobile) {
+    // Desktop → hide initial modal
+    helpModal.style.display = 'none';
+  }
+});
+
+
+</script>
+
+
+<script>
+  const loadedMarkers = new Set(); 
+
+  window.addEventListener("load", () => {
+    Object.keys(markerMenu).forEach(index => {
+      const markerData = markerMenu[index];
+      const markerEntity = document.getElementById(`marker${index}`);
+      if (!markerEntity) return;
+
+      // When marker is first detected
+      markerEntity.addEventListener("targetFound", () => {
+        if (loadedMarkers.has(index)) return; 
+        loadedMarkers.add(index);
+
+        console.log(`📦 Loading first model for marker ${index}...`);
+
+        // Create <a-assets> if not present
+        let assetsContainer = document.getElementById("marker-assets");
+        if (!assetsContainer) {
+          assetsContainer = document.createElement("a-assets");
+          assetsContainer.id = "marker-assets";
+          document.querySelector("a-scene").appendChild(assetsContainer);
+        }
+
+        // Helper for model preloading
+        const preloadModel = (path) => {
+          if (!path) return;
+          const assetId = `model-${index}-${path.replace(/[^\w]/g, "")}`;
+          if (!document.getElementById(assetId)) {
+            const assetItem = document.createElement("a-asset-item");
+            assetItem.setAttribute("id", assetId);
+            assetItem.setAttribute("src", path);
+            assetsContainer.appendChild(assetItem);
+          }
+        };
+
+        // STEP 1️⃣: Load the main (visible) model immediately
+        if (markerData.default && markerData.default.path) {
+          preloadModel(markerData.default.path);
+        }
+
+        // STEP 2️⃣: Wait a short delay to preload others quietly
+        setTimeout(() => {
+          console.log(`⚙️ Preloading background models for marker ${index}...`);
+
+          // Preload models from "options"
+          if (markerData.options) {
+            Object.values(markerData.options).forEach(opt => {
+              if (opt.model && opt.model.path) preloadModel(opt.model.path);
+            });
+          }
+
+          // Preload from "variants" and "sizes"
+          if (markerData.variants) {
+            Object.values(markerData.variants).forEach(variant => {
+              if (variant.path) preloadModel(variant.path);
+              if (variant.sizes) {
+                Object.values(variant.sizes).forEach(size => preloadModel(size.path));
+              }
+            });
+          }
+
+          // Preload from "categories"
+          if (markerData.categories) {
+            Object.values(markerData.categories).forEach(cat => {
+              if (cat.Glass && cat.Glass.path) preloadModel(cat.Glass.path);
+            });
+          }
+
+          console.log(`✅ Background models for marker ${index} are now cached.`);
+        }, 1000); 
+      });
     });
   });
 </script>
 
 <script>
-  const textElement = document.getElementById('animatedText');
-  const texts = ["Scan.View.Crave", "New Dining Experience", "Explore & Enjoy"];
-  let index = 0;
 
-  function switchText() {
-    textElement.classList.add('fade-out');
 
+function refreshScene() {
+  const scene = document.querySelector('a-scene');
+  
+  // Option 1: Soft reload (restarts MindAR tracking only)
+  if (scene && scene.systems['mindar-image']) {
+    scene.systems['mindar-image'].stop();
     setTimeout(() => {
-      textElement.textContent = texts[index];
-      textElement.classList.remove('fade-out');
-      index = (index + 1) % texts.length;
-    }, 500); 
+      scene.systems['mindar-image'].start();
+      alert('Scene refreshed! Try scanning again.');
+    }, 500);
+  } else {
+    // Option 2: Hard reload if something went wrong
+    location.reload();
   }
-  setInterval(switchText, 3000);
+}
 </script>
+
 
 
 </body>
 </html>
+
+
+
 
 
 
